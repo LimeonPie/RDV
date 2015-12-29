@@ -7,9 +7,8 @@ source('./ui.r')
 server <- function(input, output, session) {
   # Insert your user and password
   con <- dbConnect(MySQL(),
-                   user="root", password="admin",
-                   dbname="acp_dev", host="localhost")
-  
+                   user="acp", password="acpdev16",
+                   dbname="acp_dev", host="46.101.153.165", port=3306)
   
   set.seed(122)
   histdata <- rnorm(500)
