@@ -4,6 +4,7 @@ library(shinydashboard)
 ui <- dashboardPage(skin = "red",
   dashboardHeader(title = "Reddit data visualisation", titleWidth = 400),
   
+  
   dashboardSidebar(width = 400,
     sidebarMenu(
       menuItem("Pre-generated", tabName = "pregenerated", icon = icon("bar-chart"),
@@ -20,7 +21,11 @@ ui <- dashboardPage(skin = "red",
           
           dateRangeInput("dates", label = h3("Date Range")),
           
-          sidebarSearchForm(textId = "searchSubreddits", buttonId = "subreddit", label = "Subreddits..."),
+          # sidebarSearchForm(textId = "searchSubreddits", buttonId = "subreddit", label = "Subreddits..."),
+          # allow creation of new items in the drop-down list
+          selectizeInput(
+            'subreddits', label = "Subreddits...", choices = state.name,
+            options = list(create = TRUE, maxItems = 3, placeholder = 'Subreddits...')),
           
           sidebarSearchForm(textId = "searchKeywords", buttonId = "keywords", label = "Keywords..."),
           
