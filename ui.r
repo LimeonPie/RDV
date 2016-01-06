@@ -24,10 +24,18 @@ ui <- dashboardPage(skin = "red",
           # sidebarSearchForm(textId = "searchSubreddits", buttonId = "subreddit", label = "Subreddits..."),
           # allow creation of new items in the drop-down list
           selectizeInput(
-            'subreddits', label = "Subreddits...", choices = state.name,
-            options = list(create = TRUE, maxItems = 3, placeholder = 'Subreddits...')),
+            'subreddits', h3("Select subreddit"), choices = c('AskReddit', 'funny', 'nfl', 'todayilearned', 'news', 'pics', 'gifs', 'videos', 'AdviceAnimals', 'worldnews', 'politics', 'movies', 'WTF', 'nba', 'IAmA', 'soccer', 'relationships', 'leagueoflegends', 'gaming', 'BlackPeopleTwi
+', 'GlobalOffensive', 'StarWars', 'aww', 'pcmasterrace', 'Showerthoughts', 'me_irl', 'DotA2', '4chan', 'hockey', 'hiphopheads', 'SandersForPresident', 'gonewild', 'CFB', 'mildlyinteresting', 'nottheonion', 'stevenuniverse', 'G
+            rees', 'anime', 'hearthstone', 'TumblrInAction', 'MMA', 'TrollXChromosomes', 'tifu', 'oculus', 'CringeAnarchy', 'technology', 'AskWomen', 'KotakuInAction', 'interestingasfuck', 'CollegeBasketball', 'DestinyTheGame', 'explainli
+            s', 'Jokes', 'europe', 'science', 'Tinder', 'fo4', 'circlejerk', 'AskMen', 'PS4', 'conspiracy', 'Undertale', 'RealGirls', 'reactiongifs', 'Fallout', 'creepy', 'InternetIsBeautiful', 'photoshopbattles', 'atheism', 'MakingaMurde
+            ', 'bestof', 'woahdude', 'television', 'ImGoingToHellForThis', 'Android', 'smashbros', 'TwoXChromosomes', 'polandball', 'Unexpected', 'personalfinance', 'food', 'Music', 'legaladvice', 'Fitness', 'sadcringe', 'asoiaf', 'LifePr
+            stralia', 'baseball', 'starcraft', 'unitedkingdom', 'justneckbeardthings', 'books', 'wow', 'Celebs', 'tf2', 'fatlogic', 'instant_regret', 'canada', 'tumblr', 'gentlemanboners', 'RoastMe', 'space', 'OldSchoolCool', 'history', '
+            e', 'india', 'oddlysatisfying', 'NSFW_GIF', 'xboxone', 'streetwear', 'childfree', 'talesfromtechsupport', 'OutOfTheLoop', '2007scape', 'Cricket', 'undelete'), multiple = TRUE,
+            options = list(create = TRUE, maxItems = 10000, placeholder = '/r/...')),
           
-          sidebarSearchForm(textId = "searchKeywords", buttonId = "keywords", label = "Keywords..."),
+          selectizeInput(
+            'keywords', h3("Select keywords"), choices ="",multiple = TRUE,
+            options = list(create = TRUE, maxItems = 10000, placeholder = 'Keyword')),
           
           radioButtons("radio", label = h3("Gold"),
             choices = list("All" = 1, "Yes" = 2, "No" = 3), selected = 1),
