@@ -3,24 +3,23 @@ library(shiny)
 library(RMySQL)
 
 source('./ui.r')
+source('./dbQuery.r')
 
 server <- function(input, output, session) {
   # Insert your user and password
   con <- dbConnect(MySQL(),
                    user="acp", password="acpdev16",
                    dbname="acp_dev", host="46.101.153.165", port=3306)
-  
-  # set.seed(122)
-  # histdata <- rnorm(500)
-  # output$plot1 <- renderPlot({
-  #   data <- histdata[seq_len(input$slider)]
-  #   hist(data)
-  # })
-  #I guess these are not needed
-
+  query <- createQuery(0, 0, 0, 100, 0, 100, c("do", "yes", "no"))
+  print(query)
+  rs <- dbSendQuery(con, query)
+  data <- fetch(rs, n=-1)
+  print(data)
+  dbClearResult(rs)
   
   # Cleanup after closing session
   session$onSessionEnded(function() {
+    print("Session closed...")
     dbDisconnect(con)
   })
 }
