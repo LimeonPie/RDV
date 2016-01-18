@@ -20,9 +20,8 @@ ui <- dashboardPage(
           "Users analysis" = 2,
           "Subreddit analysis" = 3, 
           "Subreddit relations" = 4,
-          "Frequency of words" = 5, 
+          "Frequency of words" = 5), 
           selected = "Comment analysis"
-        )
       ),
         
       dateRangeInput("dates", 
@@ -109,85 +108,7 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
-    fluidRow(
-      box(
-        width = 6,
-        selectInput(
-          "select", 
-          label = h3("Pattern"),
-          choices = list(
-            "Comment analysis" = 1, 
-            "Users analysis" = 2,
-            "Subreddit analysis" = 3, 
-            "Subreddit relations" = 4,
-            "Frequency of words" = 5, 
-            selected = 1
-          )
-        ),
-        
-        dateRangeInput(
-          "dates", 
-          label = h3("Date Range")
-        )
-      ),
-        
-      box(
-        width = 6,
-        textInput(
-          "text", 
-          label = h3("Keywords")
-        ),
-          
-        radioButtons(
-          "radio", 
-          label = h3("Gold"),
-          choices = list(
-            "All" = 1, 
-            "Yes" = 2, 
-            "No" = 3
-          ),
-          selected = 1
-        )
-      )
-    ),
-  
-    fluidRow(
-      box(
-        title = "Upvotes",
-        numericInput(
-          "upvotes_max", 
-          label = h3("max"), 
-          value = NULL
-        ),
-        numericInput(
-          "upvotes_min", 
-          label = h3("min"), 
-          value = NULL
-        )
-      ),
-      
-      box(
-        title = "Downvotes",
-        numericInput(
-          "downvotes_max", 
-          label = h3("max"), 
-          value = NULL
-        ),
-        numericInput(
-          "downvotes_min", 
-          label = h3("min"), 
-          value = NULL
-        )
-      )
-    ),
-    
-    fluidRow(
-      box(
-        helpText(
-          "Some helpful text", 
-          label = h3("Description")
-        )
-      )
-    )
+    plotOutput("comment_analysis"),
+    plotOutput("users_analysis")
   )
 )

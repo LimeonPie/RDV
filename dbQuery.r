@@ -22,3 +22,7 @@ createQuery <- function(gilded, minScore, minUps, maxUps, minDowns, maxDowns, ke
   return(query)
 }
 
+commentsQuery <- sprintf("SELECT DATE(timestamp), COUNT(*) FROM %s GROUP BY DATE(timestamp)", tableName)
+
+usersQuery <- sprintf("SELECT DATE(timestamp), COUNT(DISTINCT author) FROM %s GROUP BY DATE(timestamp)", tableName)
+
