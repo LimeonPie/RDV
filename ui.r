@@ -61,9 +61,9 @@ ui <- dashboardPage(
                 "Users analysis" = 2,
                 "Subreddit analysis" = 3, 
                 "Subreddit relations" = 4,
-                "Frequency of words" = 5, 
-                selected = "Comment analysis"
-              )
+                "Frequency of words" = 5 
+              ),
+              selected = 1
             )
           )
         ),
