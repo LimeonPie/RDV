@@ -75,6 +75,10 @@ ui <- dashboardPage(
               "dates",
               label = h3("Pattern")
             )
+          ),
+          box(
+            title = "Time output",
+            textOutput("test1")
           )
         ),
           

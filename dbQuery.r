@@ -9,27 +9,9 @@ scheme <- list(
   upVotes = "ups",
   downVotes = "downs",
   author = "author",
-  subreddit = "subreddit"
+  subreddit = "subreddit",
+  createTime = "created_utc"
 )
-
-createQuery <- function(gilded, minScore, minUps, maxUps, minDowns, maxDowns, keywords) {
-  # Search among keywords:
-  # 1 option: WHERE body REGEXP 'key1|key2|key3'
-  # 2 option WHERE body LIKE '%key1%' OR body LIKE '%key2%'...
-  # TODO: Find what better
-  base <- c(
-    "SELECT id, author, subreddit FROM ", tableName, " WHERE ",
-    getValueEqual(scheme$gold, gilded), " AND ",
-    getValueMore(scheme$score, minScore), " AND ",
-    getValueMore(scheme$upVotes, minUps), " AND ",
-    getValueLess(scheme$upVotes, maxUps), " AND ",
-    getValueMore(scheme$downVotes, minDowns), " AND ",
-    getValueLess(scheme$downVotes, maxDowns), " AND ",
-    searchValue(scheme$comment, keywords), ";"
-  )
-  query <- paste(base, sep = "", collapse = "")
-  return(query)
-}
 
 commentAnalysis <- function(gilded, minScore, maxScore, minUps, maxUps, minDowns, maxDowns, keywords) {
   base <- c(
