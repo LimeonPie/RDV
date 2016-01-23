@@ -26,3 +26,5 @@ commentsQuery <- sprintf("SELECT DATE(timestamp), COUNT(*) FROM %s GROUP BY DATE
 
 usersQuery <- sprintf("SELECT DATE(timestamp), COUNT(DISTINCT author) FROM %s GROUP BY DATE(timestamp)", tableName)
 
+# Maybe this is correct
+subredditSizeQuery <- sprintf("SELECT DISTINCT subreddit, DATE(TIMESTAMP), COUNT(*) FROM %s GROUP BY subreddit, DATE(TIMESTAMP)", tableName)
