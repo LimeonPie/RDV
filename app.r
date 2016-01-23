@@ -23,12 +23,12 @@ server <- function(input, output, session) {
   
   #plots the comments per day
   output$comment_analysis <- renderPlot({
-    plot(as.Date(comments$`DATE(timestamp)`), comments$`COUNT(*)`, xlab = "time", ylab = "comments")
+    plot(as.Date(comments$`date`), comments$`comments`, xlab = "time", ylab = "comments")
     
   })
   #plots the new users per day
   output$users_analysis <- renderPlot({
-    plot(as.Date(users$`DATE(timestamp)`), users$`COUNT(DISTINCT author)`, xlab = "time", ylab = "new users")
+    plot(as.Date(users$`date`), users$`users`, xlab = "time", ylab = "users")
     
   })
   

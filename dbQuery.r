@@ -22,9 +22,9 @@ createQuery <- function(gilded, minScore, minUps, maxUps, minDowns, maxDowns, ke
   return(query)
 }
 
-commentsQuery <- sprintf("SELECT DATE(timestamp), COUNT(*) FROM %s GROUP BY DATE(timestamp)", tableName)
+commentsQuery <- sprintf("SELECT DATE(timestamp) AS date, COUNT(*) AS comments FROM %s GROUP BY DATE(timestamp)", tableName)
 
-usersQuery <- sprintf("SELECT DATE(timestamp), COUNT(DISTINCT author) FROM %s GROUP BY DATE(timestamp)", tableName)
+usersQuery <- sprintf("SELECT DATE(timestamp) AS date, COUNT(DISTINCT author) AS users FROM %s GROUP BY DATE(timestamp)", tableName)
 
 # Maybe this is correct
 subredditSizeQuery <- sprintf("SELECT DISTINCT subreddit, DATE(TIMESTAMP), COUNT(*) FROM %s GROUP BY subreddit, DATE(TIMESTAMP)", tableName)
