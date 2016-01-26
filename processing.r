@@ -12,3 +12,9 @@ convertTime <- function(data) {
   }
   return(data)
 }
+
+createAmountFrame <- function(data, column) {
+  frame <- as.data.frame(table(data[, column]))
+  colnames(frame) <- c(column, "freq")
+  return(frame)
+}

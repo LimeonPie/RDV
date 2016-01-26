@@ -1,6 +1,7 @@
 ## app.R ##
 library(shiny)
 library(RMySQL)
+library(ggplot2)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -27,6 +28,18 @@ server <- function(input, output, session) {
   # This is how you add events for input
   observeEvent(input$dates, {
     print(as.numeric(as.POSIXct(input$dates[1]), tz = "UTC"))
+  })
+  
+  # Launch Button onClick
+  observeEvent(input$launchButton, {
+    output$graph <- renderPlot({
+      mass <- createAmountFrame(data, "time")
+      ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
+        geom_bar(colour="black", width=.8, stat="identity") + 
+        guides(fill=FALSE) +
+        xlab("Time") + ylab("Frequency") +
+        ggtitle("Comment Analysis")
+    })
   })
   
   # Cleanup after closing session
