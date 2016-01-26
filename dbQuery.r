@@ -15,7 +15,7 @@ scheme <- list(
 
 commentAnalysis <- function(gilded, minScore, maxScore, minUps, maxUps, minDowns, maxDowns, keywords) {
   base <- c(
-    "SELECT id, author, subreddit FROM ", tableName, " WHERE ",
+    "SELECT id, author, subreddit, created_utc FROM ", tableName, " WHERE ",
     getValueEqual(scheme$gold, gilded), " AND ",
     getValueMore(scheme$score, minScore), " AND ",
     getValueLess(scheme$score, maxScore), " AND ",

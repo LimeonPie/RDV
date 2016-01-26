@@ -4,6 +4,7 @@ library(RMySQL)
 
 source('./ui.r')
 source('./dbQuery.r')
+source('./processing.r')
 
 server <- function(input, output, session) {
   # Insert your user and password
@@ -14,6 +15,7 @@ server <- function(input, output, session) {
   print(query)
   rs <- dbSendQuery(con, query)
   data <- fetch(rs, n=-1)
+  data <- convertTime(data)
   print(data)
   dbClearResult(rs)
   
