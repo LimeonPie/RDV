@@ -44,7 +44,7 @@ ui <- dashboardPage(
       # Default tab content
       tabItem(
         tabName = "default",
-        h2("Display here some basic page")
+        h2("Display here some home page")
       ),
       
       # Conf tab content
@@ -52,10 +52,10 @@ ui <- dashboardPage(
         tabName = "conf",
         fluidRow(
           box(
-            title = "Pattern select",
+            title = "Pattern",
             selectInput(
               'patternSelect',
-              label = h3("Pattern"),
+              label = h4("Select pattern"),
               choices = list(
                 "Comment analysis" = 1, 
                 "Users analysis" = 2,
@@ -65,29 +65,43 @@ ui <- dashboardPage(
               ),
               selected = 1
             )
+          ),
+          box(
+            title = "Description",
+            textOutput("patternDescription")
           )
         ),
         
-        fluidRow(  
+        fluidRow(
           box(
-            title = "Date select",
+            title = "Time period",
             dateRangeInput(
               "dates",
-              label = h3("Pattern")
+              label = h4("Select time period"),
+              start = "2008-01-15"
             )
           ),
           box(
-            title = "Time output",
-            textOutput("test1")
+            title = "Gold status",
+            radioButtons(
+              "isGilded",
+              label = h4("Gilded"),
+              choices = list(
+                "All" = 1, 
+                "Yes" = 2, 
+                "No" = 3
+              ), 
+              selected = 1
+            )
           )
         ),
           
         fluidRow(
           box(
-            title = "Subreddits select",
+            title = "Subreddits",
             selectizeInput(
-              'subredditsSelect',
-              label = h3("Pattern"),
+              'subredditsInput',
+              label = h4("Select subreddits"),
               choices = c(
                 'sports', 
                 'politics', 
@@ -102,15 +116,12 @@ ui <- dashboardPage(
                 placeholder = '/r/...'
               )
             )
-          )
-        ),
-        
-        fluidRow(
+          ),
           box(
-            title = "Keywords input",
+            title = "Keywords",
             selectizeInput(
               'keywordsInput',
-              label = h3("Pattern"),
+              label = h4("Type keywords"),
               choices ="",
               multiple = TRUE,
               options = list(
@@ -124,16 +135,23 @@ ui <- dashboardPage(
         
         fluidRow(  
           box(
-            title = "Gold status",
-            radioButtons(
-              "isGilded",
-              label = h3("Pattern"),
-              choices = list(
-                "All" = 1, 
-                "Yes" = 2, 
-                "No" = 3
-              ), 
-              selected = 1
+            title = "Downvotes",
+            sliderInput(
+              "downs", 
+              label = h4("Select a range of downvotes"), 
+              min = 0, 
+              max = 100, 
+              value = c(0, 100)
+            )
+          ),
+          box(
+            title = "Upvotes",
+            sliderInput(
+              "ups", 
+              label = h4("Select a range of upvotes"), 
+              min = 0, 
+              max = 100, 
+              value = c(0, 100)
             )
           )
         )
@@ -144,14 +162,22 @@ ui <- dashboardPage(
         tabName = "plot",
         fluidRow(
           box(
+            title = "Plot",
+            width = 12,
+            status = "primary", 
+            solidHeader = TRUE,
             plotOutput(
               "graph", 
               height = 250
             )
-          ),
-          
+          )
+        ),
+        
+        fluidRow(
           box(
             title = "Controls",
+            status = "primary", 
+            solidHeader = TRUE,
             sliderInput(
               "slider", 
               "Number of observations:", 1, 100, 50
