@@ -13,11 +13,12 @@ scheme <- list(
   createTime = "created_utc"
 )
 
-commentAnalysis <- function(gilded = NULL, minScore = NULL, 
-                            maxScore = NULL, minUps = NULL, 
-                            maxUps = NULL, minDowns = NULL, 
-                            maxDowns = NULL, timeFrom = NULL,
-                            timeBefore = NULL, keywords = NULL) {
+commentAnalysis <- function(gilded = NULL, scoreMin = NULL, 
+                            scoreMax = NULL, upsMin = NULL, 
+                            upsMax = NULL, downsMin = NULL, 
+                            downsMax = NULL, timeFrom = NULL,
+                            timeBefore = NULL, keywords = NULL,
+                            subreddits = NULL) {
   base <- c("SELECT id, author, subreddit, created_utc FROM ", tableName, " WHERE ")
   # Gold status condition
   if (!is.null(gilded) & gilded == 3) {
@@ -28,33 +29,33 @@ commentAnalysis <- function(gilded = NULL, minScore = NULL,
   }
   
   # Minimal score condition
-  if (!is.null(minScore)) {
-    base <- c(base, getValueMore(scheme$score, minScore), " AND ")
+  if (!is.null(scoreMin)) {
+    base <- c(base, getValueMore(scheme$score, scoreMin), " AND ")
   }
   
   # Maximum score condition
-  if (!is.null(maxScore)) {
-    base <- c(base, getValueLess(scheme$score, maxScore), " AND ")
+  if (!is.null(scoreMax)) {
+    base <- c(base, getValueLess(scheme$score, scoreMax), " AND ")
   }
   
   # Minimal upvotes condition
-  if (!is.null(minUps)) {
-    base <- c(base, getValueMore(scheme$upVotes, minUps), " AND ")
+  if (!is.null(upsMin)) {
+    base <- c(base, getValueMore(scheme$upVotes, upsMin), " AND ")
   }
   
   # Maximum upvotes condition
-  if (!is.null(maxUps)) {
-    base <- c(base, getValueLess(scheme$upVotes, maxUps), " AND ")
+  if (!is.null(upsMax)) {
+    base <- c(base, getValueLess(scheme$upVotes, upsMax), " AND ")
   }
   
   # Minimal downvotes condition
-  if (!is.null(minUps)) {
-    base <- c(base, getValueMore(scheme$downVotes, minDowns), " AND ")
+  if (!is.null(downsMin)) {
+    base <- c(base, getValueMore(scheme$downVotes, downsMin), " AND ")
   }
   
   # Maximum downvotes condition
-  if (!is.null(maxUps)) {
-    base <- c(base, getValueLess(scheme$downVotes, maxDowns), " AND ")
+  if (!is.null(downsMax)) {
+    base <- c(base, getValueLess(scheme$downVotes, downsMax), " AND ")
   }
   
   # Starting time condition
@@ -67,9 +68,20 @@ commentAnalysis <- function(gilded = NULL, minScore = NULL,
     base <- c(base, getValueLess(scheme$createTime, timeBefore), " AND ")
   }
   
+  # Subreddits condition
+  if (!is.null(subreddits)) {
+    base <- c(base, getValueIn(scheme$subreddit, subreddits), " AND ")
+  }
+  
   # Keywords condition
   if (!is.null(keywords)) {
     base <- c(base, searchValue(scheme$comment, keywords), ";")
+  }
+  else {
+    # Removing the last element in query (" AND ")
+    # And putting the end to it
+    base <- base[-length(base)]
+    base <- c(base, ";")
   }
   
   query <- paste(base, sep = "", collapse = "")
@@ -94,6 +106,12 @@ getValueLess <- function(value, maxValue) {
   return(query)
 }
 
+getValueIn <- function(value, list) {
+  base <- c(value, " IN (", paste("'", list, "'", sep = "", collapse = ", "), ")")
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
+
 searchValue <- function(value, keywords) {
   # Search among keywords:
   # 1 option: WHERE body REGEXP 'key1|key2|key3'
@@ -101,6 +119,12 @@ searchValue <- function(value, keywords) {
   # TODO: Find what better
   keys <- paste(keywords, collapse = "|")
   base <- c(value, " REGEXP '", keys, "'")
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
+
+findUniqueValues <- function(field) {
+  base <- c("SELECT DISTINCT ", field, " FROM ", tableName, " ORDER BY ", field, ";")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }

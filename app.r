@@ -18,6 +18,16 @@ server <- function(input, output, session) {
     port=3306
   )
   
+  observe({
+    # Filtering unique subreddits
+    # and updating the subreddits input
+    subredditsQuery <- findUniqueValues(scheme$subreddit)
+    res <- dbSendQuery(con, subredditsQuery)
+    subreddits <- fetch(res, n=-1)
+    dbClearResult(res)
+    updateSelectizeInput(session, "subredditsInput", choices = subreddits$subreddit)
+  })
+  
   output$patternDescription <- renderText({
     switch(input$patternSelect,
       "1" = "Comment analysis description",
@@ -40,13 +50,20 @@ server <- function(input, output, session) {
     periodEnd <- input$dates[2]
     periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
     pattern <- input$patternSelect
+    downVotesMin <- input$downs[1]
+    downVotesMax <- input$downs[2]
+    upVotesMin <- input$ups[1]
+    upVotesMax <- input$ups[2]
     
     query <- commentAnalysis(
       gilded = as.numeric(gilded),
-      minDowns = 0,
-      minUps = 0,
+      downsMin = downVotesMin,
+      downsMax = downVotesMax,
+      upsMin = upVotesMin,
+      upsMax = upVotesMax,
       timeFrom = periodStartPOSIX,
       timeBefore = periodEndPOSIX,
+      subreddits = subreddits,
       keywords = keywords
     )
     print(query)

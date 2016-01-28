@@ -102,13 +102,7 @@ ui <- dashboardPage(
             selectizeInput(
               'subredditsInput',
               label = h4("Select subreddits"),
-              choices = c(
-                'sports', 
-                'politics', 
-                'reddit.com', 
-                'science', 
-                'programming'
-              ), 
+              choices = c(), 
               multiple = TRUE,
               options = list(
                 create = TRUE, 
