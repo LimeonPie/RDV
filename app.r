@@ -75,13 +75,40 @@ server <- function(input, output, session) {
     
     #plotting
     output$graph <- renderPlot({
-      mass <- createAmountFrame(data, "time")
-      ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
-        geom_bar(colour="black", width=.8, stat="identity") + 
-        geom_label(aes(label = freq), size = 4) +
-        guides(fill=FALSE) +
-        xlab("Time") + ylab("Frequency") +
-        ggtitle("Comment Analysis")
+      if (input$separateSubreddits == FALSE) {
+        # All results
+        mass <- createAmountFrame(data, "time")
+        if (input$plotSelect == "1") {
+          ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
+            geom_bar(colour="black", width=.8, stat="identity") + 
+            geom_label(aes(label = freq), size = 4) +
+            guides(fill=FALSE) +
+            xlab("Time") + ylab("Frequency") +
+            ggtitle("Comment Analysis")
+        }
+        else if (input$plotSelect == "2") {
+          ggplot(data=mass, aes(x=factor(time), y=freq, group = 1)) +  
+            geom_line() + geom_point() +
+            xlab("Time") + ylab("Frequency") +
+            ggtitle("Comment Analysis")
+        }
+      }
+      else {
+        # Separating results by subreddits
+        mass <- createAmountFrame(data, c("subreddit", "time"))
+        if (input$plotSelect == "1") {
+          ggplot(data=mass, aes(x=time, y=freq, fill=subreddit)) + 
+            geom_bar(colour="black", width=.8, stat="identity") + 
+            xlab("Time") + ylab("Frequency") +
+            ggtitle("Comment Analysis by subreddits")
+        }
+        else if (input$plotSelect == "2") {
+          ggplot(data=mass, aes(x=factor(time), y=freq, group=subreddit, colour=subreddit, shape=subreddit)) +  
+            geom_line() + geom_point() +
+            xlab("Time") + ylab("Frequency") +
+            ggtitle("Comment Analysis")
+        }
+      }
     })
   })
   

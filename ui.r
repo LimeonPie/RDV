@@ -157,24 +157,39 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Plot",
-            width = 12,
+            width = 8,
             status = "primary", 
             solidHeader = TRUE,
             plotOutput(
               "graph", 
               height = 250
             )
-          )
-        ),
-        
-        fluidRow(
+          ),
           box(
-            title = "Controls",
-            status = "primary", 
+            title = "Settings",
+            status = "primary",
             solidHeader = TRUE,
+            width = 4,
+            selectInput(
+              'plotSelect',
+              label = h4("Plot type"),
+              choices = list(
+                "Bar chart" = 1, 
+                "Line chart" = 2
+              ),
+              selected = 1
+            ),
+            checkboxInput(
+              "separateSubreddits", 
+              label = "Separate subreddits", 
+              value = FALSE
+            ),
             sliderInput(
               "slider", 
-              "Number of observations:", 1, 100, 50
+              label = h4("Time period"), 
+              min = 0, 
+              max = 100, 
+              value = c(0, 100)
             )
           )
         )
