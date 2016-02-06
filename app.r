@@ -2,6 +2,7 @@
 library(shiny)
 library(RMySQL)
 library(ggplot2)
+library(wordcloud)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -55,61 +56,97 @@ server <- function(input, output, session) {
     upVotesMin <- input$ups[1]
     upVotesMax <- input$ups[2]
     
-    query <- commentAnalysis(
-      gilded = as.numeric(gilded),
-      downsMin = downVotesMin,
-      downsMax = downVotesMax,
-      upsMin = upVotesMin,
-      upsMax = upVotesMax,
-      timeFrom = periodStartPOSIX,
-      timeBefore = periodEndPOSIX,
-      subreddits = subreddits,
-      keywords = keywords
+    switch(pattern,
+      "1" = {
+        # Comment analysis
+        print("Starting comment analysis")
+        query <- commentAnalysis(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits,
+          keywords = keywords
+        )
+        print(query)
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        data <- convertTime(data)
+        print(head(data))
+        dbClearResult(res)
+        
+        #plotting
+        output$graph <- renderPlot({
+          if (input$separateSubreddits == FALSE) {
+            # All results
+            mass <- createAmountFrame(data, "time")
+            if (input$plotSelect == "1") {
+              ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
+                geom_bar(colour="black", width=.8, stat="identity") + 
+                geom_label(aes(label = freq), size = 4) +
+                guides(fill=FALSE) +
+                xlab("Time") + ylab("Frequency") +
+                ggtitle("Comment Analysis")
+            }
+            else if (input$plotSelect == "2") {
+              ggplot(data=mass, aes(x=factor(time), y=freq, group = 1)) +  
+                geom_line() + geom_point() +
+                xlab("Time") + ylab("Frequency") +
+                ggtitle("Comment Analysis")
+            }
+          }
+          else {
+            # Separating results by subreddits
+            mass <- createAmountFrame(data, c("subreddit", "time"))
+            if (input$plotSelect == "1") {
+              ggplot(data=mass, aes(x=time, y=freq, fill=subreddit)) + 
+                geom_bar(colour="black", width=.8, stat="identity") + 
+                xlab("Time") + ylab("Frequency") +
+                ggtitle("Comment Analysis by subreddits")
+            }
+            else if (input$plotSelect == "2") {
+              ggplot(data=mass, aes(x=factor(time), y=freq, group=subreddit, colour=subreddit, shape=subreddit)) +  
+                geom_line() + geom_point() +
+                xlab("Time") + ylab("Frequency") +
+                ggtitle("Comment Analysis")
+            }
+          }
+        })
+      },
+      "2" = {
+        # Users analysis
+        print("Starting users analysis")
+      },
+      "3" = {
+        # Subreddits analysis
+        print("Starting subreddits analysis")
+      },
+      "4" = {
+        # Subreddits relations
+        print("Starting subreddits analysis")
+      },
+      "5" = {
+        # Frequency of words
+        print("Starting frequence of words")
+        query <- frequencyOfWords()
+        print(query)
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        dbClearResult(res)
+        
+        corpus <- createCorpus(data, scheme$comment)
+        output$graph <- renderPlot({
+          wordcloud(corpus, max.words = 100, random.order = FALSE)
+        })
+        
+      },
+      {
+        # Default
+      }
     )
-    print(query)
-    res <- dbSendQuery(con, query)
-    data <- fetch(res, n=-1)
-    data <- convertTime(data)
-    print(head(data))
-    dbClearResult(res)
-    
-    #plotting
-    output$graph <- renderPlot({
-      if (input$separateSubreddits == FALSE) {
-        # All results
-        mass <- createAmountFrame(data, "time")
-        if (input$plotSelect == "1") {
-          ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
-            geom_bar(colour="black", width=.8, stat="identity") + 
-            geom_label(aes(label = freq), size = 4) +
-            guides(fill=FALSE) +
-            xlab("Time") + ylab("Frequency") +
-            ggtitle("Comment Analysis")
-        }
-        else if (input$plotSelect == "2") {
-          ggplot(data=mass, aes(x=factor(time), y=freq, group = 1)) +  
-            geom_line() + geom_point() +
-            xlab("Time") + ylab("Frequency") +
-            ggtitle("Comment Analysis")
-        }
-      }
-      else {
-        # Separating results by subreddits
-        mass <- createAmountFrame(data, c("subreddit", "time"))
-        if (input$plotSelect == "1") {
-          ggplot(data=mass, aes(x=time, y=freq, fill=subreddit)) + 
-            geom_bar(colour="black", width=.8, stat="identity") + 
-            xlab("Time") + ylab("Frequency") +
-            ggtitle("Comment Analysis by subreddits")
-        }
-        else if (input$plotSelect == "2") {
-          ggplot(data=mass, aes(x=factor(time), y=freq, group=subreddit, colour=subreddit, shape=subreddit)) +  
-            geom_line() + geom_point() +
-            xlab("Time") + ylab("Frequency") +
-            ggtitle("Comment Analysis")
-        }
-      }
-    })
   })
   
   # Cleanup after closing session
