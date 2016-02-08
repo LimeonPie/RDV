@@ -40,6 +40,69 @@ server <- function(input, output, session) {
     )
   })
   
+  output$settingsUI <- renderUI({
+    switch(input$patternSelect,
+      "1" = {
+        # Comment analysis UI
+        tagList(
+          selectInput(
+            'plotSelect',
+            label = h4("Plot type"),
+            choices = list(
+              "Bar chart" = 1, 
+              "Line chart" = 2
+            ),
+            selected = 1
+          ),
+          checkboxInput(
+            "separateSubreddits", 
+            label = "Separate subreddits", 
+            value = FALSE
+          ),
+          sliderInput(
+            "slider", 
+            label = h4("Time period"), 
+            min = 0, 
+            max = 100, 
+            value = c(0, 100)
+          )
+        )
+        
+      },
+      "2" = {
+        # Users analysis UI
+      },
+      "3" = {
+        # Subreddit analysis UI
+      },
+      "4" = {
+        # Subreddit relations UI
+      },
+      "5" = {
+        # Frequency of words UI
+        tagList(
+          sliderInput(
+            "frequencyMin",
+            label = h4("Minimum frequency:"),
+            min = 1,  
+            max = 50, 
+            value = 15
+          ),
+          sliderInput(
+            "numberOfWordsMax",
+            label = h4("Maximum number of words:"),
+            min = 1,  
+            max = 100,
+            value = 50
+          )
+        )
+      },
+      {
+        # Default UI
+      }
+    )
+  })
+  
   # Launch Button onClick
   observeEvent(input$launchButton, {
     # Gathering input data
@@ -131,7 +194,16 @@ server <- function(input, output, session) {
       "5" = {
         # Frequency of words
         print("Starting frequence of words")
-        query <- frequencyOfWords()
+        query <- frequencyOfWords(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits
+        )
         print(query)
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
@@ -139,9 +211,16 @@ server <- function(input, output, session) {
         
         corpus <- createCorpus(data, scheme$comment)
         output$graph <- renderPlot({
-          wordcloud(corpus, max.words = 100, random.order = FALSE)
+          wordcloud(
+            corpus, 
+            scale = c(3.5, 0.5),
+            min.freq = input$frequencyMin,
+            max.words = input$numberOfWordsMax, 
+            random.order = FALSE,
+            random.color = FALSE,
+            colors = brewer.pal(8, "Dark2")
+          )
         })
-        
       },
       {
         # Default

@@ -170,27 +170,7 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 4,
-            selectInput(
-              'plotSelect',
-              label = h4("Plot type"),
-              choices = list(
-                "Bar chart" = 1, 
-                "Line chart" = 2
-              ),
-              selected = 1
-            ),
-            checkboxInput(
-              "separateSubreddits", 
-              label = "Separate subreddits", 
-              value = FALSE
-            ),
-            sliderInput(
-              "slider", 
-              label = h4("Time period"), 
-              min = 0, 
-              max = 100, 
-              value = c(0, 100)
-            )
+            uiOutput("settingsUI")
           )
         )
       )
