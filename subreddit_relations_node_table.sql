@@ -1,3 +1,6 @@
+/*testing stuff that didn't work out*/
+
+
 /* subreddit_combinations has all the combinations between subreddits*/
 
 DROP TABLE IF EXISTS subreddit_answer;

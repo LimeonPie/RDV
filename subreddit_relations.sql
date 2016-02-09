@@ -1,3 +1,4 @@
+SELECT final.subreddit_a, final.subreddit_b FROM (
 SELECT b.subreddit AS subreddit_a, b.authors AS authors_in_sub_a, a.subreddit AS subreddit_b, FLOOR(100*COUNT(*)/b.authors) AS percent, COUNT(*)
 FROM
 ((SELECT DISTINCT (author), subreddit FROM rawdata ORDER BY subreddit) AS a)
@@ -10,4 +11,5 @@ GROUP BY subreddit, author
  ) AS b /*b is a table which includes every distinct author in every subreddits and also the amount of distinct authors in every subreddit*/)
 ON a.author=b.author
 WHERE a.subreddit!=b.subreddit 
-GROUP BY 1,3;
+GROUP BY 1,3) AS final
+WHERE final.percent > 50;

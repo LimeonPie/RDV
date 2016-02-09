@@ -1,3 +1,5 @@
+/*testing stuff that didn't work out*/
+
 DROP VIEW IF EXISTS test;
 
 CREATE VIEW test AS

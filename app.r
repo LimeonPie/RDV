@@ -1,6 +1,7 @@
 ## app.R ##
 library(shiny)
 library(RMySQL)
+library(networkD3)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -17,19 +18,28 @@ server <- function(input, output, session) {
   print(data)
   dbClearResult(rs)
   
+  subreddit_relations <- dbGetQuery(con, subredditRelationsQuery)
   
-  comments <- dbGetQuery(con, commentsQuery)
-  users <- dbGetQuery(con, usersQuery)
+  # comments <- dbGetQuery(con, commentsQuery)
+  # users <- dbGetQuery(con, usersQuery)
+  # 
+  # #plots the comments per day
+  # output$comment_analysis <- renderPlot({
+  #   plot(as.Date(comments$`DATE(timestamp)`), comments$`COUNT(*)`, xlab = "time", ylab = "comments")
+  #   
+  # })
+  # #plots the new users per day
+  # output$users_analysis <- renderPlot({
+  #   plot(as.Date(users$`DATE(timestamp)`), users$`COUNT(DISTINCT author)`, xlab = "time", ylab = "new users")
+  #   
+  # })
   
-  #plots the comments per day
-  output$comment_analysis <- renderPlot({
-    plot(as.Date(comments$`DATE(timestamp)`), comments$`COUNT(*)`, xlab = "time", ylab = "comments")
-    
-  })
   #plots the new users per day
-  output$users_analysis <- renderPlot({
-    plot(as.Date(users$`DATE(timestamp)`), users$`COUNT(DISTINCT author)`, xlab = "time", ylab = "new users")
-    
+  output$subreddit_relations <- renderSimpleNetwork({
+    subreddits_a <- subreddit_relations$subreddit_a
+    subreddits_b <- subreddit_relations$subreddit_b
+    networkData <- data.frame(subreddits_a, subreddits_b)
+    simpleNetwork(networkData)
   })
   
   # Cleanup after closing session

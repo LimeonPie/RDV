@@ -108,7 +108,8 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
-    plotOutput("comment_analysis"),
-    plotOutput("users_analysis")
+    #plotOutput("comment_analysis"),
+    #plotOutput("users_analysis"),
+    simpleNetworkOutput("subreddit_relations")
   )
 )
