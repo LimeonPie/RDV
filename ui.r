@@ -3,50 +3,50 @@ library(shinydashboard)
 
 ui <- dashboardPage(
   skin = "red",
-  
+
   dashboardHeader(
-    title = "Reddit data visualisation", 
+    title = "Reddit data visualisation",
     titleWidth = 300
   ),
-  
+
   dashboardSidebar(
     width = 300,
     sidebarMenu(
       menuItem(
-        "Home", 
-        tabName = "default", 
+        "Home",
+        tabName = "default",
         icon = icon("home", lib = "glyphicon")
       ),
       menuItem(
-        "Configure", 
-        tabName = "conf", 
+        "Configure",
+        tabName = "conf",
         icon = icon("pencil", lib = "glyphicon")
       ),
       menuItem(
-        "Plot", 
-        tabName = "plot", 
+        "Plot",
+        tabName = "plot",
         icon = icon("stats", lib = "glyphicon")
       )
     ),
-    
+
     column(
       width = 1,
       actionButton(
-        "launchButton", 
+        "launchButton",
         label = "Release the Kraken!"
       )
     )
   ),
-  
+
   dashboardBody(
     tabItems(
-      
+
       # Default tab content
       tabItem(
         tabName = "default",
         h2("Display here some home page")
       ),
-      
+
       # Conf tab content
       tabItem(
         tabName = "conf",
@@ -57,11 +57,11 @@ ui <- dashboardPage(
               'patternSelect',
               label = h4("Select pattern"),
               choices = list(
-                "Comment analysis" = 1, 
+                "Comment analysis" = 1,
                 "Users analysis" = 2,
-                "Subreddit analysis" = 3, 
+                "Subreddit analysis" = 3,
                 "Subreddit relations" = 4,
-                "Frequency of words" = 5 
+                "Frequency of words" = 5
               ),
               selected = 1
             )
@@ -71,7 +71,7 @@ ui <- dashboardPage(
             textOutput("patternDescription")
           )
         ),
-        
+
         fluidRow(
           box(
             title = "Time period",
@@ -87,26 +87,26 @@ ui <- dashboardPage(
               "isGilded",
               label = h4("Gilded"),
               choices = list(
-                "All" = 1, 
-                "Yes" = 2, 
+                "All" = 1,
+                "Yes" = 2,
                 "No" = 3
-              ), 
+              ),
               selected = 1
             )
           )
         ),
-          
+
         fluidRow(
           box(
             title = "Subreddits",
             selectizeInput(
               'subredditsInput',
               label = h4("Select subreddits"),
-              choices = c(), 
+              choices = c(),
               multiple = TRUE,
               options = list(
-                create = TRUE, 
-                maxItems = 10000, 
+                create = TRUE,
+                maxItems = 10000,
                 placeholder = '/r/...'
               )
             )
@@ -119,38 +119,38 @@ ui <- dashboardPage(
               choices ="",
               multiple = TRUE,
               options = list(
-                create = TRUE, 
-                maxItems = 10000, 
+                create = TRUE,
+                maxItems = 10000,
                 placeholder = 'Keyword'
               )
             )
           )
         ),
-        
-        fluidRow(  
+
+        fluidRow(
           box(
             title = "Downvotes",
             sliderInput(
-              "downs", 
-              label = h4("Select a range of downvotes"), 
-              min = 0, 
-              max = 100, 
+              "downs",
+              label = h4("Select a range of downvotes"),
+              min = 0,
+              max = 100,
               value = c(0, 100)
             )
           ),
           box(
             title = "Upvotes",
             sliderInput(
-              "ups", 
-              label = h4("Select a range of upvotes"), 
-              min = 0, 
-              max = 100, 
+              "ups",
+              label = h4("Select a range of upvotes"),
+              min = 0,
+              max = 100,
               value = c(0, 100)
             )
           )
         )
       ),
-      
+
       # Plot tab content
       tabItem(
         tabName = "plot",
@@ -158,10 +158,10 @@ ui <- dashboardPage(
           box(
             title = "Plot",
             width = 8,
-            status = "primary", 
+            status = "primary",
             solidHeader = TRUE,
             plotOutput(
-              "graph", 
+              "graph",
               height = 250
             )
           ),
