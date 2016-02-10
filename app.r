@@ -39,7 +39,7 @@ server <- function(input, output, session) {
     subreddits_a <- subreddit_relations$subreddit_a
     subreddits_b <- subreddit_relations$subreddit_b
     networkData <- data.frame(subreddits_a, subreddits_b)
-    simpleNetwork(networkData)
+    simpleNetwork(networkData, fontSize = 20)
   })
   
   # Cleanup after closing session
