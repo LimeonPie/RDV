@@ -93,7 +93,7 @@ subredditsRelations <- function(gilded = NULL, scoreMin = NULL,
                                 upsMax = NULL, downsMin = NULL,
                                 downsMax = NULL, timeFrom = NULL,
                                 timeBefore = NULL, keywords = NULL,
-                                subreddits = NULL) {
+                                subreddits = NULL, percentage = NULL) {
   
   #generates the condition clause
   base <- ""
@@ -156,8 +156,8 @@ subredditsRelations <- function(gilded = NULL, scoreMin = NULL,
     base <- c(base, searchValue(scheme$comment, keywords), " AND ")
   }
   
+  
   print("Here are the conditions: ")
-  print(base)
   conditions <- paste(base, sep = "", collapse = "")
   print(conditions)
   
@@ -174,12 +174,11 @@ subredditsRelations <- function(gilded = NULL, scoreMin = NULL,
     ON a.author=b.author
     WHERE a.subreddit!=b.subreddit 
     GROUP BY 1,3) AS final
-    WHERE final.percent > 30;", conditions, conditions, conditions)
+    WHERE final.percent > %s;", conditions, conditions, conditions, percentage)
   
   #removes new lines from the query
-  str_replace_all(query, "[\r\n]" , "")
+  gsub("[\r\n]", "", query)
   print(query)
-  
   return(query)
 }
 

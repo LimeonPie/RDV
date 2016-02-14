@@ -40,6 +40,18 @@ server <- function(input, output, session) {
       "Default description"
     )
   })
+  output$plotUI <- renderUI({
+    if(input$patternSelect == "4"){
+      #networkplot
+      simpleNetworkOutput("network", height = 250)
+    } else {
+      #originalplot
+      plotOutput(
+        "graph",
+        height = 250
+      )
+    }
+  })
   
   output$settingsUI <- renderUI({
     switch(input$patternSelect,
@@ -87,13 +99,6 @@ server <- function(input, output, session) {
               "Line chart" = 2
             ),
             selected = 1
-          ),
-          sliderInput(
-            "slider", 
-            label = h4("Time period"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
           )
         )
       },
@@ -137,6 +142,7 @@ server <- function(input, output, session) {
     downVotesMax <- input$downs[2]
     upVotesMin <- input$ups[1]
     upVotesMax <- input$ups[2]
+    relation <- input$percentage
 
     
     switch(pattern,
@@ -218,22 +224,23 @@ server <- function(input, output, session) {
           timeFrom = periodStartPOSIX,
           timeBefore = periodEndPOSIX,
           subreddits = subreddits,
-          keywords = keywords
+          keywords = keywords,
+          percentage = relation
         )
-        print(query)
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
         print(head(data))
         dbClearResult(res)
+        print(data)
         
-        if(is.null(data)){
+        if(is.null(data$subreddit_a)){
           print("Query was empty")
-          renderText({"The query was empty"
+          output$query_info <-renderText({"The query was empty"
           })
         }
         
         #plotting
-        output$graph <- renderSimpleNetwork({
+        output$network <- renderSimpleNetwork({
           subreddits_a <- data$subreddit_a
           subreddits_b <- data$subreddit_b
           networkData <- data.frame(subreddits_a, subreddits_b)
@@ -276,6 +283,8 @@ server <- function(input, output, session) {
       }
     )
   })
+  
+    
   
   # Cleanup after closing session
   session$onSessionEnded(function() {

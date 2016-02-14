@@ -148,6 +148,20 @@ ui <- dashboardPage(
               value = c(0, 100)
             )
           )
+        ),
+        conditionalPanel(
+          condition = "input.patternSelect == '4'",
+        fluidRow(
+          box(
+            title = "Percentage for subreddit relations",
+            sliderInput(
+              "percentage",
+              label = h4("Select percentage"),
+              min = 0, 
+              max = 100, 
+              value = 10)
+          )
+        )
         )
       ),
 
@@ -160,16 +174,8 @@ ui <- dashboardPage(
             width = 8,
             status = "primary",
             solidHeader = TRUE,
-            if (4 == 4){
-              simpleNetworkOutput("graph")
-              
-            }
-            else {
-              plotOutput(
-                "graph",
-                height = 250
-              )
-              }
+            # node charts for the subreddit relations pattern require simpleNetworkOutput instead of plotOutput
+            uiOutput("plotUI")
           ),
           box(
             title = "Settings",
