@@ -160,10 +160,16 @@ ui <- dashboardPage(
             width = 8,
             status = "primary",
             solidHeader = TRUE,
-            plotOutput(
-              "graph",
-              height = 250
-            )
+            if (4 == 4){
+              simpleNetworkOutput("graph")
+              
+            }
+            else {
+              plotOutput(
+                "graph",
+                height = 250
+              )
+              }
           ),
           box(
             title = "Settings",
@@ -171,6 +177,11 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 4,
             uiOutput("settingsUI")
+            
+          ),
+          box(
+            title = "Raw_text",
+            textOutput("query_info")
           )
         )
       )

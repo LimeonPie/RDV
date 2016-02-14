@@ -3,6 +3,7 @@ library(shiny)
 library(RMySQL)
 library(ggplot2)
 library(wordcloud)
+library(networkD3)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -77,6 +78,24 @@ server <- function(input, output, session) {
       },
       "4" = {
         # Subreddit relations UI
+        tagList(
+          selectInput(
+            'plotSelect',
+            label = h4("Plot type"),
+            choices = list(
+              "Bar chart" = 1, 
+              "Line chart" = 2
+            ),
+            selected = 1
+          ),
+          sliderInput(
+            "slider", 
+            label = h4("Time period"), 
+            min = 0, 
+            max = 100, 
+            value = c(0, 100)
+          )
+        )
       },
       "5" = {
         # Frequency of words UI
@@ -186,11 +205,40 @@ server <- function(input, output, session) {
       },
       "3" = {
         # Subreddits analysis
-        print("Starting subreddits analysis")
       },
       "4" = {
         # Subreddits relations
-        print("Starting subreddits analysis")
+        print("Starting subreddits relations analysis")
+        query <- subredditsRelations(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits,
+          keywords = keywords
+        )
+        print(query)
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        print(head(data))
+        dbClearResult(res)
+        
+        if(is.null(data)){
+          print("Query was empty")
+          renderText({"The query was empty"
+          })
+        }
+        
+        #plotting
+        output$graph <- renderSimpleNetwork({
+          subreddits_a <- data$subreddit_a
+          subreddits_b <- data$subreddit_b
+          networkData <- data.frame(subreddits_a, subreddits_b)
+          simpleNetwork(networkData, fontSize = 20)
+        })
       },
       "5" = {
         # Frequency of words
