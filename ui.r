@@ -171,6 +171,13 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 4,
             uiOutput("settingsUI")
+          ),
+          box(
+            title = "Save",
+            status = "primary",
+            solidHeader = TRUE,
+            width = 4,
+            uiOutput("saveUI")
           )
         )
       )

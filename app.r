@@ -102,6 +102,15 @@ server <- function(input, output, session) {
       }
     )
   })
+  output$saveUI <- renderUI(
+    actionButton("save", "Save")
+    
+  )
+  
+  observeEvent(input$save, {
+    ggsave("plot.png")
+  })
+  
   
   # Launch Button onClick
   observeEvent(input$launchButton, {
