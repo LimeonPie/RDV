@@ -57,13 +57,14 @@ ui <- dashboardPage(
               'patternSelect',
               label = h4("Select pattern"),
               choices = list(
+                "- Select pattern -" = 0,
                 "Comment analysis" = 1, 
                 "Users analysis" = 2,
                 "Subreddit analysis" = 3, 
                 "Subreddit relations" = 4,
                 "Frequency of words" = 5 
               ),
-              selected = 1
+              selected = 0
             )
           ),
           box(
@@ -72,107 +73,13 @@ ui <- dashboardPage(
           )
         ),
         
-        fluidRow(
-          box(
-            title = "Time period",
-            dateRangeInput(
-              "dates",
-              label = h4("Select time period"),
-              start = "2008-01-15"
-            )
-          ),
-          box(
-            title = "Gold status",
-            radioButtons(
-              "isGilded",
-              label = h4("Gilded"),
-              choices = list(
-                "All" = 1, 
-                "Yes" = 2, 
-                "No" = 3
-              ), 
-              selected = 1
-            )
-          )
-        ),
-          
-        fluidRow(
-          box(
-            title = "Subreddits",
-            selectizeInput(
-              'subredditsInput',
-              label = h4("Select subreddits"),
-              choices = c(), 
-              multiple = TRUE,
-              options = list(
-                create = TRUE, 
-                maxItems = 10000, 
-                placeholder = '/r/...'
-              )
-            )
-          ),
-          box(
-            title = "Keywords",
-            selectizeInput(
-              'keywordsInput',
-              label = h4("Type keywords"),
-              choices ="",
-              multiple = TRUE,
-              options = list(
-                create = TRUE, 
-                maxItems = 10000, 
-                placeholder = 'Keyword'
-              )
-            )
-          )
-        ),
-        
-        fluidRow(  
-          box(
-            title = "Downvotes",
-            sliderInput(
-              "downs", 
-              label = h4("Select a range of downvotes"), 
-              min = 0, 
-              max = 100, 
-              value = c(0, 100)
-            )
-          ),
-          box(
-            title = "Upvotes",
-            sliderInput(
-              "ups", 
-              label = h4("Select a range of upvotes"), 
-              min = 0, 
-              max = 100, 
-              value = c(0, 100)
-            )
-          )
-        )
+        uiOutput("inputComponents")
       ),
       
       # Plot tab content
       tabItem(
         tabName = "plot",
-        fluidRow(
-          box(
-            title = "Plot",
-            width = 8,
-            status = "primary", 
-            solidHeader = TRUE,
-            plotOutput(
-              "graph", 
-              height = 250
-            )
-          ),
-          box(
-            title = "Settings",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 4,
-            uiOutput("settingsUI")
-          )
-        )
+        uiOutput("plotUI")
       )
     )
   )

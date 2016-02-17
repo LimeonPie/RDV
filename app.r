@@ -7,6 +7,7 @@ library(wordcloud)
 source('./ui.r')
 source('./dbQuery.r')
 source('./processing.r')
+source('./components.r')
 
 server <- function(input, output, session) {
   # Insert your user and password
@@ -19,16 +20,6 @@ server <- function(input, output, session) {
     port=3306
   )
   
-  observe({
-    # Filtering unique subreddits
-    # and updating the subreddits input
-    subredditsQuery <- findUniqueValues(scheme$subreddit)
-    res <- dbSendQuery(con, subredditsQuery)
-    subreddits <- fetch(res, n=-1)
-    dbClearResult(res)
-    updateSelectizeInput(session, "subredditsInput", choices = subreddits$subreddit)
-  })
-  
   output$patternDescription <- renderText({
     switch(input$patternSelect,
       "1" = "Comment analysis description",
@@ -40,62 +31,65 @@ server <- function(input, output, session) {
     )
   })
   
-  output$settingsUI <- renderUI({
+  output$inputComponents <- renderUI(
     switch(input$patternSelect,
       "1" = {
-        # Comment analysis UI
-        tagList(
-          selectInput(
-            'plotSelect',
-            label = h4("Plot type"),
-            choices = list(
-              "Bar chart" = 1, 
-              "Line chart" = 2
-            ),
-            selected = 1
-          ),
-          checkboxInput(
-            "separateSubreddits", 
-            label = "Separate subreddits", 
-            value = FALSE
-          ),
-          sliderInput(
-            "slider", 
-            label = h4("Time period"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
-          )
-        )
-        
+        # Comment analysis input components
+        getCommentAnalysisComponents()
+      },
+      "2" = {
+        # Users analysis input components
+        getUserAnalysisComponents()
+      },
+      "3" = {
+        # Subreddit analysis input components
+        getSubredditAnalysisComponents()
+      },
+      "4" = {
+        # Subreddit relations input components
+        getSubredditRelationsComponents()
+      },
+      "5" = {
+        # Frequency of words input components
+        getFrequencyComponents()
+      },
+      {
+        # Default input components
+      }
+    )
+  )
+  
+  observeEvent(input$patternSelect, {
+    # Filtering unique subreddits
+    # and updating the subreddits input
+    subredditsQuery <- findUniqueValues(scheme$subreddit)
+    res <- dbSendQuery(con, subredditsQuery)
+    subreddits <- fetch(res, n=-1)
+    dbClearResult(res)
+    updateSelectizeInput(session, "subredditsInput", choices = subreddits$subreddit)
+  })
+  
+  output$plotUI <- renderUI({
+    switch(input$patternSelect,
+      "1" = {
+        # Comment analysis plot UI
+        getCommentAnalysisPlotUI()
       },
       "2" = {
         # Users analysis UI
+        getUserAnalysisPlotUI()
       },
       "3" = {
         # Subreddit analysis UI
+        getSubredditAnalysisPlotUI()
       },
       "4" = {
         # Subreddit relations UI
+        getSubredditRelationsPlotUI()
       },
       "5" = {
         # Frequency of words UI
-        tagList(
-          sliderInput(
-            "frequencyMin",
-            label = h4("Minimum frequency:"),
-            min = 1,  
-            max = 50, 
-            value = 15
-          ),
-          sliderInput(
-            "numberOfWordsMax",
-            label = h4("Maximum number of words:"),
-            min = 1,  
-            max = 100,
-            value = 50
-          )
-        )
+        getFrequencyPlotUI()
       },
       {
         # Default UI
@@ -106,23 +100,28 @@ server <- function(input, output, session) {
   # Launch Button onClick
   observeEvent(input$launchButton, {
     # Gathering input data
-    gilded <- input$isGilded
-    keywords <- input$keywordsInput
-    subreddits <- input$subredditsInput
-    periodStart <- input$dates[1]
-    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-    periodEnd <- input$dates[2]
-    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
+    
+    # The main thing is pattern
     pattern <- input$patternSelect
-    downVotesMin <- input$downs[1]
-    downVotesMax <- input$downs[2]
-    upVotesMin <- input$ups[1]
-    upVotesMax <- input$ups[2]
+    # Time is common component everywhere
+    periodStart <- input$timeInput[1]
+    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+    periodEnd <- input$timeInput[2]
+    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
     
     switch(pattern,
       "1" = {
         # Comment analysis
         print("Starting comment analysis")
+        # Taking input parameters
+        gilded <- input$isGilded
+        keywords <- input$keywordsInput
+        subreddits <- input$subredditsInput
+        downVotesMin <- input$downs[1]
+        downVotesMax <- input$downs[2]
+        upVotesMin <- input$ups[1]
+        upVotesMax <- input$ups[2]
+        # Making query
         query <- commentAnalysis(
           gilded = as.numeric(gilded),
           downsMin = downVotesMin,
@@ -182,6 +181,42 @@ server <- function(input, output, session) {
       "2" = {
         # Users analysis
         print("Starting users analysis")
+        # Taking input parametres
+        gilded <- input$isGilded
+        keywords <- input$keywordsInput
+        subreddits <- input$subredditsInput
+        downVotesMin <- input$downs[1]
+        downVotesMax <- input$downs[2]
+        upVotesMin <- input$ups[1]
+        upVotesMax <- input$ups[2]
+        # Making query
+        query <- usersAnalysis(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits,
+          keywords = keywords
+        )
+        print(query)
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        data <- convertTime(data)
+        print(head(data))
+        dbClearResult(res)
+        #plotting
+        output$graph <- renderPlot({
+          mass <- createAmountFrame(data, "time")
+          ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
+            geom_bar(colour="black", width=.8, stat="identity") + 
+            geom_label(aes(label = freq), size = 4) +
+            guides(fill=FALSE) +
+            xlab("Time") + ylab("Frequency") +
+            ggtitle("Users Analysis")
+        })
       },
       "3" = {
         # Subreddits analysis
@@ -194,6 +229,15 @@ server <- function(input, output, session) {
       "5" = {
         # Frequency of words
         print("Starting frequence of words")
+        # Taking input parametres
+        gilded <- input$isGilded
+        keywords <- input$keywordsInput
+        subreddits <- input$subredditsInput
+        downVotesMin <- input$downs[1]
+        downVotesMax <- input$downs[2]
+        upVotesMin <- input$ups[1]
+        upVotesMax <- input$ups[2]
+        # Making a query
         query <- frequencyOfWords(
           gilded = as.numeric(gilded),
           downsMin = downVotesMin,
