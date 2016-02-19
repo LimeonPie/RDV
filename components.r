@@ -91,6 +91,10 @@ getCommentAnalysisComponents <- function() {
             value = c(0, 100)
           )
         )
+      ),
+      actionButton(
+        "launchButton", 
+        label = "Release the Kraken!"
       )
     )
   )
@@ -147,6 +151,10 @@ getUserAnalysisComponents <- function() {
             start = "2008-01-15"
           )
         )
+      ),
+      actionButton(
+        "launchButton", 
+        label = "Release the Kraken!"
       )
     )
   )
@@ -189,6 +197,10 @@ getSubredditAnalysisComponents <- function() {
             start = "2008-01-15"
           )
         )
+      ),
+      actionButton(
+        "launchButton", 
+        label = "Release the Kraken!"
       )
     )
   )
@@ -231,6 +243,10 @@ getSubredditRelationsComponents <- function() {
             start = "2008-01-15"
           )
         )
+      ),
+      actionButton(
+        "launchButton", 
+        label = "Release the Kraken!"
       )
     )
   )
@@ -339,6 +355,10 @@ getFrequencyComponents <- function() {
             value = c(0, 100)
           )
         )
+      ),
+      actionButton(
+        "launchButton", 
+        label = "Release the Kraken!"
       )
     )
   )

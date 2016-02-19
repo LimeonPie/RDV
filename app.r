@@ -9,14 +9,21 @@ source('./dbQuery.r')
 source('./processing.r')
 source('./components.r')
 
+# Des server details
+# user="acp"
+# password="acpdev16"
+# dbname="acp_dev"
+# host="46.101.153.165"
+# port=3306
+
 server <- function(input, output, session) {
   # Insert your user and password
   con <- dbConnect(
     MySQL(),
-    user="acp", 
+    user="acp",
     password="acpdev16",
-    dbname="acp_dev", 
-    host="46.101.153.165", 
+    dbname="acp_dev",
+    host="46.101.153.165",
     port=3306
   )
   

@@ -27,14 +27,6 @@ ui <- dashboardPage(
         tabName = "plot", 
         icon = icon("stats", lib = "glyphicon")
       )
-    ),
-    
-    column(
-      width = 1,
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
-      )
     )
   ),
   

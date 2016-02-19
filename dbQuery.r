@@ -1,7 +1,11 @@
 ## dbQuery.r ##
 ## Operations with data ##
 
-tableName <- "rawdata"
+# small db
+#tableName <- "rawdata"
+# bigger db
+tableName <- "rawdata1"
+
 scheme <- list(
   comment = "body",
   gold = "gilded",
