@@ -183,14 +183,38 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 4,
             uiOutput("settingsUI")
-            
+            )
           ),
+        fluidRow(
           box(
-            title = "Raw_text",
-            textOutput("query_info")
+            textOutput("timer")
+          )
+        ),
+        
+        fluidRow(
+          box(
+            title = "Additional information",
+            width = 12,
+            status = "primary",
+            solidHeader = TRUE,
+            radioButtons('infoSelect', label=NULL,
+                         choices = list("Empty" = 1, "Show query" = 2, "Show query results" = 3), 
+                         selected = 1, inline=TRUE),
+            
+            conditionalPanel(
+              condition = "input.infoSelect == '2'",
+                textOutput("query_info")
+            ),
+            
+            conditionalPanel(
+              condition = "input.infoSelect == '3'",
+              dataTableOutput("query_results")
+            )
+            
+            )
           )
         )
-      )
+      
     )
   )
 )

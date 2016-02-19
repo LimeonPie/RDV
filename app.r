@@ -9,7 +9,11 @@ source('./ui.r')
 source('./dbQuery.r')
 source('./processing.r')
 
+
+
 server <- function(input, output, session) {
+  startTime <- Sys.time()
+  
   # Insert your user and password
   con <- dbConnect(
     MySQL(),
@@ -41,17 +45,27 @@ server <- function(input, output, session) {
     )
   })
   output$plotUI <- renderUI({
+    #the node chart for subreddit relations requires networkplot
     if(input$patternSelect == "4"){
-      #networkplot
       simpleNetworkOutput("network", height = 250)
     } else {
-      #originalplot
       plotOutput(
         "graph",
         height = 250
       )
     }
   })
+  
+
+  #if(timer_variable == '1'){
+  #  output$timer <- renderText({
+  #    sprintf("% s", i)
+  #    print(i)
+  #    i <<- i + 1
+  #    invalidateLater(1000, session)
+  #  })
+  #}
+
   
   output$settingsUI <- renderUI({
     switch(input$patternSelect,
@@ -90,17 +104,6 @@ server <- function(input, output, session) {
       },
       "4" = {
         # Subreddit relations UI
-        tagList(
-          selectInput(
-            'plotSelect',
-            label = h4("Plot type"),
-            choices = list(
-              "Bar chart" = 1, 
-              "Line chart" = 2
-            ),
-            selected = 1
-          )
-        )
       },
       "5" = {
         # Frequency of words UI
@@ -166,6 +169,11 @@ server <- function(input, output, session) {
         data <- convertTime(data)
         print(head(data))
         dbClearResult(res)
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
+        
         
         #plotting
         output$graph <- renderPlot({
@@ -215,6 +223,7 @@ server <- function(input, output, session) {
       "4" = {
         # Subreddits relations
         print("Starting subreddits relations analysis")
+        timer_variable <<- '1'
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
           downsMin = downVotesMin,
@@ -227,17 +236,18 @@ server <- function(input, output, session) {
           keywords = keywords,
           percentage = relation
         )
+        
+        timer_variable <<- '0'
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
         print(head(data))
         dbClearResult(res)
         print(data)
         
-        if(is.null(data$subreddit_a)){
-          print("Query was empty")
-          output$query_info <-renderText({"The query was empty"
-          })
-        }
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
         
         #plotting
         output$network <- renderSimpleNetwork({
@@ -264,6 +274,10 @@ server <- function(input, output, session) {
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
         dbClearResult(res)
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
         
         corpus <- createCorpus(data, scheme$comment)
         output$graph <- renderPlot({
@@ -288,7 +302,9 @@ server <- function(input, output, session) {
   
   # Cleanup after closing session
   session$onSessionEnded(function() {
+    endTime <- Sys.time()
     print("Session closed...")
+    print(endTime - startTime)
     dbDisconnect(con)
   })
 }
