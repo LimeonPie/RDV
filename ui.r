@@ -45,16 +45,15 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Pattern",
+            status = "primary",
             selectInput(
               'patternSelect',
               label = h4("Select pattern"),
               choices = list(
                 "- Select pattern -" = 0,
-                "Comment analysis" = 1, 
-                "Users analysis" = 2,
-                "Subreddit analysis" = 3, 
-                "Subreddit relations" = 4,
-                "Frequency of words" = 5 
+                "Amount of comments" = 1, 
+                "Subreddit relations" = 2,
+                "Frequency of words" = 3 
               ),
               selected = 0
             )

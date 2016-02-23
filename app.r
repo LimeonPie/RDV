@@ -53,12 +53,11 @@ server <- function(input, output, session) {
   
   output$patternDescription <- renderText({
     switch(input$patternSelect,
-      "1" = "Comment analysis description",
-      "2" = "Users analysis description",
-      "3" = "Subreddit analysis description",
-      "4" = "Subreddit relations description",
-      "5" = "Frequency of words description",
-      "Default description"
+      "1" = "Amount of comments description",
+      "2" = "Subreddit relations description",
+      "3" = "Frequency of words description",
+      "Please select the desired type of data processing and define input parametres.
+      The description of patter will appear here."
     )
   })
   
@@ -75,18 +74,10 @@ server <- function(input, output, session) {
         getCommentAnalysisComponents(startTime$time, endTime$time)
       },
       "2" = {
-        # Users analysis input components
-        getUserAnalysisComponents(startTime$time, endTime$time)
-      },
-      "3" = {
-        # Subreddit analysis input components
-        getSubredditAnalysisComponents(startTime$time, endTime$time)
-      },
-      "4" = {
         # Subreddit relations input components
         getSubredditRelationsComponents(startTime$time, endTime$time)
       },
-      "5" = {
+      "3" = {
         # Frequency of words input components
         getFrequencyComponents(startTime$time, endTime$time)
       },
@@ -103,18 +94,10 @@ server <- function(input, output, session) {
         getCommentAnalysisPlotUI()
       },
       "2" = {
-        # Users analysis UI
-        getUserAnalysisPlotUI()
-      },
-      "3" = {
-        # Subreddit analysis UI
-        getSubredditAnalysisPlotUI()
-      },
-      "4" = {
         # Subreddit relations UI
         getSubredditRelationsPlotUI()
       },
-      "5" = {
+      "3" = {
         # Frequency of words UI
         getFrequencyPlotUI()
       },
@@ -127,7 +110,6 @@ server <- function(input, output, session) {
   # Launch Button onClick
   observeEvent(input$launchButton, {
     # Gathering input data
-    
     # The main thing is pattern
     pattern <- input$patternSelect
     # Time is common component everywhere
@@ -143,21 +125,19 @@ server <- function(input, output, session) {
         # Taking input parameters
         gilded <- input$isGilded
         keywords <- input$keywordsInput
+        authors <- input$authorsInput
         subreddits <- input$subredditsInput
-        downVotesMin <- input$downs[1]
-        downVotesMax <- input$downs[2]
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         # Making query
         query <- commentAnalysis(
           gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
           upsMin = upVotesMin,
           upsMax = upVotesMax,
           timeFrom = periodStartPOSIX,
           timeBefore = periodEndPOSIX,
           subreddits = subreddits,
+          authors = authors,
           keywords = keywords
         )
         print(query)
@@ -206,69 +186,20 @@ server <- function(input, output, session) {
         })
       },
       "2" = {
-        # Users analysis
-        print("Starting users analysis")
-        # Taking input parametres
-        gilded <- input$isGilded
-        keywords <- input$keywordsInput
-        subreddits <- input$subredditsInput
-        downVotesMin <- input$downs[1]
-        downVotesMax <- input$downs[2]
-        upVotesMin <- input$ups[1]
-        upVotesMax <- input$ups[2]
-        # Making query
-        query <- usersAnalysis(
-          gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
-          upsMin = upVotesMin,
-          upsMax = upVotesMax,
-          timeFrom = periodStartPOSIX,
-          timeBefore = periodEndPOSIX,
-          subreddits = subreddits,
-          keywords = keywords
-        )
-        print(query)
-        res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        data <- convertTime(data)
-        print(head(data))
-        dbClearResult(res)
-        #plotting
-        output$graph <- renderPlot({
-          mass <- createAmountFrame(data, "time")
-          ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
-            geom_bar(colour="black", width=.8, stat="identity") + 
-            geom_label(aes(label = freq), size = 4) +
-            guides(fill=FALSE) +
-            xlab("Time") + ylab("Frequency") +
-            ggtitle("Users Analysis")
-        })
-      },
-      "3" = {
-        # Subreddits analysis
-        print("Starting subreddits analysis")
-      },
-      "4" = {
         # Subreddits relations
         print("Starting subreddits analysis")
       },
-      "5" = {
+      "3" = {
         # Frequency of words
         print("Starting frequence of words")
         # Taking input parametres
         gilded <- input$isGilded
-        keywords <- input$keywordsInput
         subreddits <- input$subredditsInput
-        downVotesMin <- input$downs[1]
-        downVotesMax <- input$downs[2]
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         # Making a query
         query <- frequencyOfWords(
           gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
           upsMin = upVotesMin,
           upsMax = upVotesMax,
           timeFrom = periodStartPOSIX,

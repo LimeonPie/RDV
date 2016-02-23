@@ -2,6 +2,7 @@
 ## Return UI components for specific issue ##
 
 strings <- list(
+  description = "Description",
   timePeriodTitle = "Time period",
   timePeriodDesc = "Select time period",
   goldTitle = "Gold status",
@@ -9,7 +10,9 @@ strings <- list(
   subredditsTitle = "Subreddits",
   subredditsDesc = "Select subreddits",
   keywordsTitle = "Keywords",
-  keywordsDesc = "Type keywords"
+  authorsTitle = "Authors",
+  authorsDesc = "List authors",
+  keywordsDesc = "List keywords"
 ) 
 
 getCommentAnalysisComponents <- function(startTime, endTime) {
@@ -18,6 +21,7 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
       fluidRow(
         box(
           title = strings$timePeriodTitle,
+          status = "danger",
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
@@ -26,26 +30,12 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
             format = "dd/mm/yy",
             min = startTime, 
             max = endTime
-          )
+          ),
+          h5("Warning! Selecting a long perioid will gradually affect processing time.")
         ),
         box(
-          title = strings$goldTitle,
-          radioButtons(
-            "isGilded",
-            label = h4(strings$goldDesc),
-            choices = list(
-              "All" = 1, 
-              "Yes" = 2, 
-              "No" = 3
-            ), 
-            selected = 1
-          )
-        )
-      ),
-      
-      fluidRow(
-        box(
           title = strings$subredditsTitle,
+          status = "primary",
           selectizeInput(
             'subredditsInput',
             label = h4(strings$subredditsDesc),
@@ -57,9 +47,13 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
               placeholder = '/r/...'
             )
           )
-        ),
+        )
+      ),
+      
+      fluidRow(
         box(
           title = strings$keywordsTitle,
+          status = "primary",
           selectizeInput(
             'keywordsInput',
             label = h4(strings$keywordsDesc),
@@ -68,7 +62,22 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
             options = list(
               create = TRUE, 
               maxItems = 10000, 
-              placeholder = 'Keyword'
+              placeholder = 'Keywords'
+            )
+          )
+        ),
+        box(
+          title = strings$authorsTitle,
+          status = "primary",
+          selectizeInput(
+            'authorsInput',
+            label = h4(strings$authorsDesc),
+            choices ="",
+            multiple = TRUE,
+            options = list(
+              create = TRUE, 
+              maxItems = 10000, 
+              placeholder = 'Authors'
             )
           )
         )
@@ -76,23 +85,28 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
       
       fluidRow(  
         box(
-          title = "Downvotes",
-          sliderInput(
-            "downs", 
-            label = h4("Select a range of downvotes"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
-          )
-        ),
-        box(
           title = "Upvotes",
+          status = "primary",
           sliderInput(
             "ups", 
             label = h4("Select a range of upvotes"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
+            min = -50, 
+            max = 50, 
+            value = c(-50, 50)
+          )
+        ),
+        box(
+          title = strings$goldTitle,
+          status = "primary",
+          radioButtons(
+            "isGilded",
+            label = h4(strings$goldDesc),
+            choices = list(
+              "All" = 1, 
+              "Yes" = 2, 
+              "No" = 3
+            ), 
+            selected = 1
           )
         )
       ),
@@ -143,112 +157,13 @@ getCommentAnalysisPlotUI <- function() {
   )
 }
 
-getUserAnalysisComponents <- function(startTime, endTime) {
-  return(
-    tagList(
-      fluidRow(
-        box(
-          title = strings$timePeriodTitle,
-          dateRangeInput(
-            "timeInput",
-            label = h4(strings$timePeriodDesc),
-            start = startTime,
-            end = endTime,
-            format = "dd/mm/yy",
-            min = startTime, 
-            max = endTime
-          )
-        )
-      ),
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
-      )
-    )
-  )
-}
-
-getUserAnalysisPlotUI <- function() {
-  return(
-    tagList(
-      fluidRow(
-        box(
-          title = "Plot",
-          width = 8,
-          status = "primary", 
-          solidHeader = TRUE,
-          plotOutput(
-            "graph", 
-            height = 250
-          )
-        ),
-        box(
-          title = "Settings",
-          status = "primary",
-          solidHeader = TRUE,
-          width = 4
-        )
-      )
-    )
-  )
-}
-
-getSubredditAnalysisComponents <- function(startTime, endTime) {
-  return(
-    tagList(
-      fluidRow(
-        box(
-          title = strings$timePeriodTitle,
-          dateRangeInput(
-            "timeInput",
-            label = h4(strings$timePeriodDesc),
-            start = startTime,
-            end = endTime,
-            format = "dd/mm/yy",
-            min = startTime, 
-            max = endTime
-          )
-        )
-      ),
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
-      )
-    )
-  )
-}
-
-getSubredditAnalysisPlotUI <- function() {
-  return(
-    tagList(
-      fluidRow(
-        box(
-          title = "Plot",
-          width = 8,
-          status = "primary", 
-          solidHeader = TRUE,
-          plotOutput(
-            "graph", 
-            height = 250
-          )
-        ),
-        box(
-          title = "Settings",
-          status = "primary",
-          solidHeader = TRUE,
-          width = 4
-        )
-      )
-    )
-  )
-}
-
 getSubredditRelationsComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
         box(
           title = strings$timePeriodTitle,
+          status = "danger",
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
@@ -257,7 +172,8 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             format = "dd/mm/yy",
             min = startTime, 
             max = endTime
-          )
+          ),
+          h5("Warning! Selecting a long perioid will gradually affect processing time.")
         )
       ),
       actionButton(
@@ -299,6 +215,7 @@ getFrequencyComponents <- function(startTime, endTime) {
       fluidRow(
         box(
           title = strings$timePeriodTitle,
+          status = "danger",
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
@@ -307,25 +224,12 @@ getFrequencyComponents <- function(startTime, endTime) {
             format = "dd/mm/yy",
             min = startTime, 
             max = endTime
-          )
+          ),
+          h5("Warning! Selecting a long perioid will gradually affect processing time.")
         ),
         box(
-          title = strings$goldTitle,
-          radioButtons(
-            "isGilded",
-            label = h4(strings$goldDesc),
-            choices = list(
-              "All" = 1, 
-              "Yes" = 2, 
-              "No" = 3
-            ), 
-            selected = 1
-          )
-        )
-      ),
-      fluidRow(
-        box(
           title = strings$subredditsTitle,
+          status = "primary",
           selectizeInput(
             'subredditsInput',
             label = h4(strings$subredditsDesc),
@@ -337,45 +241,36 @@ getFrequencyComponents <- function(startTime, endTime) {
               placeholder = '/r/...'
             )
           )
-        ),
-        box(
-          title = strings$keywordsTitle,
-          selectizeInput(
-            'keywordsInput',
-            label = h4(strings$keywordsDesc),
-            choices ="",
-            multiple = TRUE,
-            options = list(
-              create = TRUE, 
-              maxItems = 10000, 
-              placeholder = 'Keyword'
-            )
-          )
         )
       ),
-      
-      fluidRow(  
+      fluidRow(
         box(
-          title = "Downvotes",
-          sliderInput(
-            "downs", 
-            label = h4("Select a range of downvotes"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
+          title = strings$goldTitle,
+          status = "primary",
+          radioButtons(
+            "isGilded",
+            label = h4(strings$goldDesc),
+            choices = list(
+              "All" = 1, 
+              "Yes" = 2, 
+              "No" = 3
+            ), 
+            selected = 1
           )
         ),
         box(
           title = "Upvotes",
+          status = "primary",
           sliderInput(
             "ups", 
             label = h4("Select a range of upvotes"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
+            min = -50, 
+            max = 50, 
+            value = c(-50, 50)
           )
         )
       ),
+      
       actionButton(
         "launchButton", 
         label = "Release the Kraken!"
