@@ -3,12 +3,17 @@ library(shiny)
 library(RMySQL)
 library(ggplot2)
 library(wordcloud)
+library(networkD3)
 
 source('./ui.r')
 source('./dbQuery.r')
 source('./processing.r')
 
+
+
 server <- function(input, output, session) {
+  startTime <- Sys.time()
+  
   # Insert your user and password
   con <- dbConnect(
     MySQL(),
@@ -39,6 +44,28 @@ server <- function(input, output, session) {
       "Default description"
     )
   })
+  output$plotUI <- renderUI({
+    #the node chart for subreddit relations requires networkplot
+    if(input$patternSelect == "4"){
+      simpleNetworkOutput("network", height = 250)
+    } else {
+      plotOutput(
+        "graph",
+        height = 250
+      )
+    }
+  })
+  
+
+  #if(timer_variable == '1'){
+  #  output$timer <- renderText({
+  #    sprintf("% s", i)
+  #    print(i)
+  #    i <<- i + 1
+  #    invalidateLater(1000, session)
+  #  })
+  #}
+
   
   output$settingsUI <- renderUI({
     switch(input$patternSelect,
@@ -127,6 +154,8 @@ server <- function(input, output, session) {
     downVotesMax <- input$downs[2]
     upVotesMin <- input$ups[1]
     upVotesMax <- input$ups[2]
+    relation <- input$percentage
+
     
     switch(pattern,
       "1" = {
@@ -149,6 +178,11 @@ server <- function(input, output, session) {
         data <- convertTime(data)
         print(head(data))
         dbClearResult(res)
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
+        
         
         #plotting
         output$graph <- renderPlot({
@@ -194,11 +228,43 @@ server <- function(input, output, session) {
       },
       "3" = {
         # Subreddits analysis
-        print("Starting subreddits analysis")
       },
       "4" = {
         # Subreddits relations
-        print("Starting subreddits analysis")
+        print("Starting subreddits relations analysis")
+        timer_variable <<- '1'
+        query <- subredditsRelations(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits,
+          keywords = keywords,
+          percentage = relation
+        )
+        
+        timer_variable <<- '0'
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        print(head(data))
+        dbClearResult(res)
+        print(data)
+        
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
+        
+        #plotting
+        output$network <- renderSimpleNetwork({
+          subreddits_a <- data$subreddit_a
+          subreddits_b <- data$subreddit_b
+          networkData <- data.frame(subreddits_a, subreddits_b)
+          simpleNetwork(networkData, fontSize = 20)
+        })
       },
       "5" = {
         # Frequency of words
@@ -217,6 +283,10 @@ server <- function(input, output, session) {
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
         dbClearResult(res)
+        output$query_info <-renderText({query
+        })
+        output$query_results <-renderDataTable({data
+        })
         
         corpus <- createCorpus(data, scheme$comment)
         output$graph <- renderPlot({
@@ -237,9 +307,13 @@ server <- function(input, output, session) {
     )
   })
   
+    
+  
   # Cleanup after closing session
   session$onSessionEnded(function() {
+    endTime <- Sys.time()
     print("Session closed...")
+    print(endTime - startTime)
     dbDisconnect(con)
   })
 }

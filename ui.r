@@ -148,6 +148,20 @@ ui <- dashboardPage(
               value = c(0, 100)
             )
           )
+        ),
+        conditionalPanel(
+          condition = "input.patternSelect == '4'",
+        fluidRow(
+          box(
+            title = "Percentage for subreddit relations",
+            sliderInput(
+              "percentage",
+              label = h4("Select percentage"),
+              min = 0,
+              max = 100,
+              value = 10)
+          )
+        )
         )
       ),
 
@@ -160,10 +174,8 @@ ui <- dashboardPage(
             width = 8,
             status = "primary",
             solidHeader = TRUE,
-            plotOutput(
-              "graph",
-              height = 250
-            )
+            # node charts for the subreddit relations pattern require simpleNetworkOutput instead of plotOutput
+            uiOutput("plotUI")
           ),
           box(
             title = "Settings",
@@ -179,8 +191,37 @@ ui <- dashboardPage(
             width = 4,
             uiOutput("saveUI")
           )
+        ),
+        fluidRow(
+          box(
+            textOutput("timer")
+          )
+        ),
+
+        fluidRow(
+          box(
+            title = "Additional information",
+            width = 12,
+            status = "primary",
+            solidHeader = TRUE,
+            radioButtons('infoSelect', label=NULL,
+                         choices = list("Empty" = 1, "Show query" = 2, "Show query results" = 3),
+                         selected = 1, inline=TRUE),
+
+            conditionalPanel(
+              condition = "input.infoSelect == '2'",
+                textOutput("query_info")
+            ),
+
+            conditionalPanel(
+              condition = "input.infoSelect == '3'",
+              dataTableOutput("query_results")
+            )
+
+            )
+          )
         )
-      )
+
     )
   )
 )
