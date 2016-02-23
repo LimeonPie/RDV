@@ -27,6 +27,30 @@ server <- function(input, output, session) {
     port=3306
   )
   
+  # Getting start time of dataset
+  minTimeQuery <- getMinValue(scheme$createTime)
+  rs <- dbSendQuery(con, minTimeQuery)
+  minTime <- fetch(rs, n=-1)
+  startTime <- convertTime(minTime)
+  dbClearResult(rs)
+  
+  # Getting end time of dataset
+  maxTimeQuery <- getMaxValue(scheme$createTime)
+  rs <- dbSendQuery(con, maxTimeQuery)
+  maxTime <- fetch(rs, n=-1)
+  endTime <- convertTime(maxTime)
+  dbClearResult(rs)
+  
+  # Fetching all subreddits in this dataset
+  subredditsQuery <- findUniqueValuesWithinTime(
+    field = scheme$subreddit,
+    timeFrom = minTime,
+    timeBefore = maxTime
+  )
+  rs <- dbSendQuery(con, subredditsQuery)
+  datasetSubreddits <- fetch(rs, n=-1)
+  dbClearResult(rs)
+  
   output$patternDescription <- renderText({
     switch(input$patternSelect,
       "1" = "Comment analysis description",
@@ -38,43 +62,39 @@ server <- function(input, output, session) {
     )
   })
   
+  observeEvent(input$patternSelect, {
+    # Filtering unique subreddits
+    # and updating the subreddits input
+    updateSelectizeInput(session, "subredditsInput", choices = datasetSubreddits$subreddit)
+  })
+  
   output$inputComponents <- renderUI(
     switch(input$patternSelect,
       "1" = {
         # Comment analysis input components
-        getCommentAnalysisComponents()
+        getCommentAnalysisComponents(startTime$time, endTime$time)
       },
       "2" = {
         # Users analysis input components
-        getUserAnalysisComponents()
+        getUserAnalysisComponents(startTime$time, endTime$time)
       },
       "3" = {
         # Subreddit analysis input components
-        getSubredditAnalysisComponents()
+        getSubredditAnalysisComponents(startTime$time, endTime$time)
       },
       "4" = {
         # Subreddit relations input components
-        getSubredditRelationsComponents()
+        getSubredditRelationsComponents(startTime$time, endTime$time)
       },
       "5" = {
         # Frequency of words input components
-        getFrequencyComponents()
+        getFrequencyComponents(startTime$time, endTime$time)
       },
       {
         # Default input components
       }
     )
   )
-  
-  observeEvent(input$patternSelect, {
-    # Filtering unique subreddits
-    # and updating the subreddits input
-    subredditsQuery <- findUniqueValues(scheme$subreddit)
-    res <- dbSendQuery(con, subredditsQuery)
-    subreddits <- fetch(res, n=-1)
-    dbClearResult(res)
-    updateSelectizeInput(session, "subredditsInput", choices = subreddits$subreddit)
-  })
   
   output$plotUI <- renderUI({
     switch(input$patternSelect,

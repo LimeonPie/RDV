@@ -12,7 +12,7 @@ strings <- list(
   keywordsDesc = "Type keywords"
 ) 
 
-getCommentAnalysisComponents <- function() {
+getCommentAnalysisComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
@@ -21,7 +21,11 @@ getCommentAnalysisComponents <- function() {
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
-            start = "2008-01-15"
+            start = startTime,
+            end = endTime,
+            format = "dd/mm/yy",
+            min = startTime, 
+            max = endTime
           )
         ),
         box(
@@ -139,7 +143,7 @@ getCommentAnalysisPlotUI <- function() {
   )
 }
 
-getUserAnalysisComponents <- function() {
+getUserAnalysisComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
@@ -148,7 +152,11 @@ getUserAnalysisComponents <- function() {
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
-            start = "2008-01-15"
+            start = startTime,
+            end = endTime,
+            format = "dd/mm/yy",
+            min = startTime, 
+            max = endTime
           )
         )
       ),
@@ -185,7 +193,7 @@ getUserAnalysisPlotUI <- function() {
   )
 }
 
-getSubredditAnalysisComponents <- function() {
+getSubredditAnalysisComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
@@ -194,7 +202,11 @@ getSubredditAnalysisComponents <- function() {
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
-            start = "2008-01-15"
+            start = startTime,
+            end = endTime,
+            format = "dd/mm/yy",
+            min = startTime, 
+            max = endTime
           )
         )
       ),
@@ -231,7 +243,7 @@ getSubredditAnalysisPlotUI <- function() {
   )
 }
 
-getSubredditRelationsComponents <- function() {
+getSubredditRelationsComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
@@ -240,7 +252,11 @@ getSubredditRelationsComponents <- function() {
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
-            start = "2008-01-15"
+            start = startTime,
+            end = endTime,
+            format = "dd/mm/yy",
+            min = startTime, 
+            max = endTime
           )
         )
       ),
@@ -277,7 +293,7 @@ getSubredditRelationsPlotUI <- function() {
   )
 }
 
-getFrequencyComponents <- function() {
+getFrequencyComponents <- function(startTime, endTime) {
   return(
     tagList(
       fluidRow(
@@ -286,7 +302,11 @@ getFrequencyComponents <- function() {
           dateRangeInput(
             "timeInput",
             label = h4(strings$timePeriodDesc),
-            start = "2008-01-15"
+            start = startTime,
+            end = endTime,
+            format = "dd/mm/yy",
+            min = startTime, 
+            max = endTime
           )
         ),
         box(

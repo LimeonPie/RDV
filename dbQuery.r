@@ -290,3 +290,26 @@ findUniqueValues <- function(field) {
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }
+
+findUniqueValuesWithinTime <- function(field, timeFrom, timeBefore) {
+  base <- c("SELECT DISTINCT ", field, " FROM ", tableName, " WHERE ")
+  base <- c(base, getValueMore(scheme$createTime, timeFrom), " AND ")
+  base <- c(base, getValueLess(scheme$createTime, timeBefore))
+  base <- c(base, " ORDER BY ", field, ";")
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
+
+getMinValue <- function(field) {
+  base <- c("SELECT ", field, " FROM ", tableName)
+  base <- c(base, " WHERE ", field, "=(SELECT MIN(", field, ") FROM ", tableName, ");")
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
+
+getMaxValue <- function(field) {
+  base <- c("SELECT ", field, " FROM ", tableName)
+  base <- c(base, " WHERE ", field, "=(SELECT MAX(", field, ") FROM ", tableName, ");")
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
