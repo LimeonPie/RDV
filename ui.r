@@ -5,7 +5,8 @@ ui <- dashboardPage(
   skin = "red",
 
   dashboardHeader(
-    title = "Reddit data visualisation",
+    title = span(img(src="acpreddit-logo.png", height = 42, width = 42, align = "middle"), "Reddit data visualisation"),
+    #title = "Reddit data visualisation",
     titleWidth = 300
   ),
 
@@ -36,7 +37,8 @@ ui <- dashboardPage(
       # Default tab content
       tabItem(
         tabName = "default",
-        h2("Display here some home page")
+        h2("Hello World"),
+        p("The purpose of the project is to provide interesting and useful information about Reddit by visualising the given dataset. We do that by creating user-friendly web interface for making queries, and to present them in the form of multiple charts. So the main focus of the project is giving user the tools to make her/his own search to the database and present that information. Furthermore, we will pre-generate some charts that either have considerable run-time or have particularly interesting information to show.")
       ),
 
       # Conf tab content
