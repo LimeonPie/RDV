@@ -3,12 +3,12 @@ library(shinydashboard)
 
 ui <- dashboardPage(
   skin = "red",
-  
+
   dashboardHeader(
     title = "Reddit data visualisation",
     titleWidth = 300
   ),
-  
+
   dashboardSidebar(
     width = 300,
     sidebarMenu(
@@ -29,16 +29,16 @@ ui <- dashboardPage(
       )
     )
   ),
-  
+
   dashboardBody(
     tabItems(
-      
+
       # Default tab content
       tabItem(
         tabName = "default",
         h2("Display here some home page")
       ),
-      
+
       # Conf tab content
       tabItem(
         tabName = "conf",
@@ -65,7 +65,7 @@ ui <- dashboardPage(
         ),
         uiOutput("inputComponents")
       ),
-      
+
       # Plot tab content
       tabItem(
         tabName = "plot",
