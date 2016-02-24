@@ -3,113 +3,75 @@ library(shinydashboard)
 
 ui <- dashboardPage(
   skin = "red",
+
   dashboardHeader(
-    title = "Reddit data visualisation", 
-    titleWidth = 400
+    title = "Reddit data visualisation",
+    titleWidth = 300
   ),
+
   dashboardSidebar(
-    width = 400,
-    column(
-      width = 12,
-           
-      selectInput(
-        'select', 
-        label = h3("Pattern"), 
-        choices = list(
-          "Comment analysis" = 1, 
-          "Users analysis" = 2,
-          "Subreddit analysis" = 3, 
-          "Subreddit relations" = 4,
-          "Frequency of words" = 5), 
-          selected = "Comment analysis"
+    width = 300,
+    sidebarMenu(
+      menuItem(
+        "Home",
+        tabName = "default",
+        icon = icon("home", lib = "glyphicon")
       ),
-        
-      dateRangeInput("dates", 
-        label = h3("Date Range")
+      menuItem(
+        "Configure",
+        tabName = "conf",
+        icon = icon("pencil", lib = "glyphicon")
       ),
-      
-      # sidebarSearchForm(textId = "searchSubreddits", buttonId = "subreddit", label = "Subreddits..."),
-      # allow creation of new items in the drop-down list
-      
-      selectizeInput(
-        'subreddits', 
-        h3("Select subreddit"), 
-        choices = c(
-          'sports', 
-          'politics', 
-          'reddit.com', 
-          'science', 
-          'programming'
-        ), 
-        multiple = TRUE,
-        options = list(
-          create = TRUE, 
-          maxItems = 10000, 
-          placeholder = '/r/...'
-        )
-      ),
-        
-      selectizeInput(
-        'keywords', 
-        h3("Select keywords"), 
-        choices ="",
-        multiple = TRUE,
-        options = list(
-          create = TRUE, 
-          maxItems = 10000, 
-          placeholder = 'Keyword'
-        )
-      ),
-        
-      radioButtons(
-        "radio", 
-        label = h3("Gold"),
-        choices = list(
-          "All" = 1, 
-          "Yes" = 2, 
-          "No" = 3
-        ), 
-        selected = 1
-      ),
-        
-      h3("Upvotes"),
-      
-      numericInput(
-        "upvotes_max", 
-        label = h4("max"), 
-        value = NULL
-      ),
-      numericInput(
-        "upvotes_min", 
-        label = h4("min"), 
-        value = NULL
-      ),
-        
-      h3("Downvotes"),
-      
-      numericInput(
-        "downvotes_max", 
-        label = h4("max"), 
-        value = NULL
-      ),
-      
-      numericInput(
-        "downvotes_min", 
-        label = h4("min"), 
-        value = NULL
-      ),
-        
-      actionButton(
-        "go", 
-        label = "GO!", 
-        width = "50%"
+      menuItem(
+        "Plot",
+        tabName = "plot",
+        icon = icon("stats", lib = "glyphicon")
       )
     )
   ),
-  
+
   dashboardBody(
-    #plotOutput("comment_analysis"),
-    #plotOutput("users_analysis"),
-    simpleNetworkOutput("subreddit_relations")
+    tabItems(
+
+      # Default tab content
+      tabItem(
+        tabName = "default",
+        h2("Display here some home page")
+      ),
+
+      # Conf tab content
+      tabItem(
+        tabName = "conf",
+        fluidRow(
+          box(
+            title = "Pattern",
+            status = "primary",
+            selectInput(
+              'patternSelect',
+              label = h4("Select pattern"),
+              choices = list(
+                "- Select pattern -" = 0,
+                "Amount of comments" = 1, 
+                "Subreddit relations" = 2,
+                "Frequency of words" = 3
+              ),
+              selected = 0
+            )
+          ),
+          box(
+            title = "Description",
+            textOutput("patternDescription")
+          )
+        ),
+        uiOutput("inputComponents")
+      ),
+
+      # Plot tab content
+      tabItem(
+        tabName = "plot",
+        
+        uiOutput("plotUI")
+      )
+    )
   )
 )
