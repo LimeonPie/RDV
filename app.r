@@ -226,7 +226,6 @@ server <- function(input, output, session) {
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         relation <- input$percentage
-        timer_variable <<- '1'
         
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
@@ -239,7 +238,6 @@ server <- function(input, output, session) {
           percentage = relation
         )
         
-        timer_variable <<- '0'
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
         print(head(data))
