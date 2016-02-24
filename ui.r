@@ -1,5 +1,15 @@
 ## UI ##
 library(shinydashboard)
+library(googleCharts)
+
+# xlim <- list(
+#   min = min(data$time) - 500,
+#   max = max(data$time) + 500
+# )
+# ylim <- list(
+#   min = min(data$time),
+#   max = max(data$time) + 3
+# )
 
 ui <- dashboardPage(
   skin = "red",
@@ -30,7 +40,6 @@ ui <- dashboardPage(
     ),
 
     column(
-      width = 1,
       actionButton(
         "launchButton",
         label = "Release the Kraken!"
@@ -169,6 +178,60 @@ ui <- dashboardPage(
       tabItem(
         tabName = "plot",
         fluidRow(
+            box(
+              googleBubbleChart("chart",
+                width="100%", height = "475px",
+                # Set the default options for this chart; they can be
+                # overridden in server.R on a per-update basis. See
+                # https://developers.google.com/chart/interactive/docs/gallery/bubblechart
+                # for option documentation.
+                options = list(
+                  fontName = "Source Sans Pro",
+                  fontSize = 13,
+                  # Set axis labels and ranges
+                  hAxis = list(
+                    title = "Health expenditure, per capita ($USD)",
+                    viewWindow = xlim
+                  ),
+                  vAxis = list(
+                    title = "Life expectancy (years)",
+                    viewWindow = ylim
+                  ),
+                  # The default padding is a little too spaced out
+                  chartArea = list(
+                    top = 50, left = 75,
+                    height = "75%", width = "75%"
+                  ),
+                  # Allow pan/zoom
+                  explorer = list(),
+                  # Set bubble visual props
+                  bubble = list(
+                    opacity = 0.4, stroke = "none",
+                    # Hide bubble label
+                    textStyle = list(
+                      color = "none"
+                    )
+                  ),
+                  # Set fonts
+                  titleTextStyle = list(
+                    fontSize = 16
+                  ),
+                  tooltip = list(
+                    textStyle = list(
+                      fontSize = 12
+                    )
+                  )
+                )
+              )
+            ),
+            box(
+              title = "Plot",
+              width = 8,
+              status = "primary",
+              solidHeader = TRUE,
+              # node charts for the subreddit relations pattern require simpleNetworkOutput instead of plotOutput
+              uiOutput("plotUI")
+            ),  
           box(
             title = "Plot",
             width = 8,

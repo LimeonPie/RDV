@@ -4,6 +4,7 @@ library(RMySQL)
 library(ggplot2)
 library(wordcloud)
 library(networkD3)
+library(dplyr)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -101,6 +102,20 @@ server <- function(input, output, session) {
       },
       "3" = {
         # Subreddit analysis UI
+        tagList(
+          checkboxInput(
+            "separateSubreddits", 
+            label = "Separate subreddits", 
+            value = FALSE
+          ),
+          sliderInput(
+            "year", 
+            label = h4("Year"), 
+            min = 2008,
+            max = 2016,
+            value = c(2008, 2016)
+          )
+        )
       },
       "4" = {
         # Subreddit relations UI
@@ -219,6 +234,62 @@ server <- function(input, output, session) {
       },
       "3" = {
         # Subreddits analysis
+        print("Starting subreddits analysis")
+        query <- subredditsAnalysis(
+          gilded = as.numeric(gilded),
+          downsMin = downVotesMin,
+          downsMax = downVotesMax,
+          upsMin = upVotesMin,
+          upsMax = upVotesMax,
+          timeFrom = periodStartPOSIX,
+          timeBefore = periodEndPOSIX,
+          subreddits = subreddits,
+          keywords = keywords
+        )
+        print(query)
+        res <- dbSendQuery(con, query)
+        data <- fetch(res, n=-1)
+        data <- convertTime(data)
+        print(head(data))
+        dbClearResult(res)
+        
+        # Provide explicit colors for regions, so they don't get recoded when the
+        # different series happen to be ordered differently from year to year.
+        # http://andrewgelman.com/2014/09/11/mysterious-shiny-things/
+        defaultColors <- c("#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477")
+        series <- structure(
+          lapply(defaultColors, function(color) { list(color=color) })
+        )
+        
+        yearData <- reactive({
+          # Filter to the desired year, and put the columns
+          # in the order that Google's Bubble Chart expects
+          # them (name, x, y, color, size). Also sort by region
+          # so that Google Charts orders and colors the regions
+          # consistently.
+          df <- data %>%
+            # filter(Year == input$year) %>%
+            select(
+              subreddit, 
+              time,
+              1,
+              subreddit,
+              subreddit) %>%
+            arrange(subreddit)
+        })
+        
+        output$graph <- reactive({
+          # Return the data and options
+          list(
+            data = googleDataTable(yearData()),
+            options = list(
+              title = sprintf(
+                "Health expenditure vs. life expectancy, %s",
+                input$year),
+              series = series
+            )
+          )
+        })
       },
       "4" = {
         # Subreddits relations
