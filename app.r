@@ -4,13 +4,18 @@ library(RMySQL)
 library(ggplot2)
 library(wordcloud)
 library(networkD3)
-library(dplyr)
 
 source('./ui.r')
 source('./dbQuery.r')
 source('./processing.r')
+source('./components.r')
 
-
+# Des server details
+# user="acp"
+# password="acpdev16"
+# dbname="acp_dev"
+# host="46.101.153.165"
+# port=3306
 
 server <- function(input, output, session) {
   startTime <- Sys.time()
@@ -18,366 +23,300 @@ server <- function(input, output, session) {
   # Insert your user and password
   con <- dbConnect(
     MySQL(),
-    user="acp", 
+    user="acp",
     password="acpdev16",
-    dbname="acp_dev", 
-    host="46.101.153.165", 
+    dbname="acp_dev",
+    host="46.101.153.165",
     port=3306
   )
   
-  observe({
-    # Filtering unique subreddits
-    # and updating the subreddits input
-    subredditsQuery <- findUniqueValues(scheme$subreddit)
-    res <- dbSendQuery(con, subredditsQuery)
-    subreddits <- fetch(res, n=-1)
-    dbClearResult(res)
-    updateSelectizeInput(session, "subredditsInput", choices = subreddits$subreddit)
-  })
+  # Getting start time of dataset
+  minTimeQuery <- getMinValue(scheme$createTime)
+  rs <- dbSendQuery(con, minTimeQuery)
+  minTime <- fetch(rs, n=-1)
+  startTime <- convertTime(minTime)
+  dbClearResult(rs)
+  
+  # Getting end time of dataset
+  maxTimeQuery <- getMaxValue(scheme$createTime)
+  rs <- dbSendQuery(con, maxTimeQuery)
+  maxTime <- fetch(rs, n=-1)
+  endTime <- convertTime(maxTime)
+  dbClearResult(rs)
+  
+  # Fetching all subreddits in this dataset
+  subredditsQuery <- findUniqueValuesWithinTime(
+    field = scheme$subreddit,
+    timeFrom = minTime,
+    timeBefore = maxTime
+  )
+  rs <- dbSendQuery(con, subredditsQuery)
+  datasetSubreddits <- fetch(rs, n=-1)
+  dbClearResult(rs)
   
   output$patternDescription <- renderText({
     switch(input$patternSelect,
-      "1" = "Comment analysis description",
-      "2" = "Users analysis description",
-      "3" = "Subreddit analysis description",
-      "4" = "Subreddit relations description",
-      "5" = "Frequency of words description",
-      "Default description"
+           "1" = "Amount of comments description",
+           "2" = "Subreddit relations description",
+           "3" = "Frequency of words description",
+           "Please select the desired type of data processing and define input parametres.
+           The description of patter will appear here."
     )
   })
-  output$plotUI <- renderUI({
-    #the node chart for subreddit relations requires networkplot
-    if(input$patternSelect == "4"){
-      simpleNetworkOutput("network", height = 250)
-    } else {
-      plotOutput(
-        "graph",
-        height = 250
-      )
-    }
+  
+  observeEvent(input$patternSelect, {
+    # Filtering unique subreddits
+    # and updating the subreddits input
+    updateSelectizeInput(session, "subredditsInput", choices = datasetSubreddits$subreddit)
   })
   
-
-  #if(timer_variable == '1'){
-  #  output$timer <- renderText({
-  #    sprintf("% s", i)
-  #    print(i)
-  #    i <<- i + 1
-  #    invalidateLater(1000, session)
-  #  })
-  #}
-
-  
-  output$settingsUI <- renderUI({
+  output$inputComponents <- renderUI(
     switch(input$patternSelect,
-      "1" = {
-        # Comment analysis UI
-        tagList(
-          selectInput(
-            'plotSelect',
-            label = h4("Plot type"),
-            choices = list(
-              "Bar chart" = 1, 
-              "Line chart" = 2
-            ),
-            selected = 1
-          ),
-          checkboxInput(
-            "separateSubreddits", 
-            label = "Separate subreddits", 
-            value = FALSE
-          ),
-          sliderInput(
-            "slider", 
-            label = h4("Time period"), 
-            min = 0, 
-            max = 100, 
-            value = c(0, 100)
-          )
-        )
-        
-      },
-      "2" = {
-        # Users analysis UI
-      },
-      "3" = {
-        # Subreddit analysis UI
-        tagList(
-          checkboxInput(
-            "separateSubreddits", 
-            label = "Separate subreddits", 
-            value = FALSE
-          ),
-          sliderInput(
-            "year", 
-            label = h4("Year"), 
-            min = 2008,
-            max = 2016,
-            value = c(2008, 2016)
-          )
-        )
-      },
-      "4" = {
-        # Subreddit relations UI
-      },
-      "5" = {
-        # Frequency of words UI
-        tagList(
-          sliderInput(
-            "frequencyMin",
-            label = h4("Minimum frequency:"),
-            min = 1,  
-            max = 50, 
-            value = 15
-          ),
-          sliderInput(
-            "numberOfWordsMax",
-            label = h4("Maximum number of words:"),
-            min = 1,  
-            max = 100,
-            value = 50
-          )
-        )
-      },
-      {
-        # Default UI
-      }
+           "1" = {
+             # Comment analysis input components
+             getCommentAnalysisComponents(startTime$time, endTime$time)
+           },
+           "2" = {
+             # Subreddit relations input components
+             getSubredditRelationsComponents(startTime$time, endTime$time)
+           },
+           "3" = {
+             # Frequency of words input components
+             getFrequencyComponents(startTime$time, endTime$time)
+           },
+           {
+             # Default input components
+           }
     )
+  )
+  
+  output$plotUI <- renderUI({
+    switch(input$patternSelect,
+           "1" = {
+             # Comment analysis plot UI
+             getCommentAnalysisPlotUI()
+           },
+           "2" = {
+             # Subreddit relations UI
+             getSubredditRelationsPlotUI()
+           },
+           "3" = {
+             # Frequency of words UI
+             getFrequencyPlotUI()
+           },
+           {
+             # Default UI
+           }
+    )
+  })
+  
+  output$queryInfoUI <- renderUI({
+    switch(input$infoSelect,
+           "2" = {
+             # Show query
+             textOutput("query_info")
+           },
+           "3" = {
+             # Show query results
+             dataTableOutput("query_results")
+           },
+           {
+             # Default empty
+           }
+    )
+  })
+  
+  # Save button onClick
+  observeEvent(input$save, {
+    ggsave("plot.png")
   })
   
   # Launch Button onClick
   observeEvent(input$launchButton, {
     # Gathering input data
-    gilded <- input$isGilded
-    keywords <- input$keywordsInput
-    subreddits <- input$subredditsInput
-    periodStart <- input$dates[1]
-    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-    periodEnd <- input$dates[2]
-    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
+    # The main thing is pattern
     pattern <- input$patternSelect
-    downVotesMin <- input$downs[1]
-    downVotesMax <- input$downs[2]
-    upVotesMin <- input$ups[1]
-    upVotesMax <- input$ups[2]
-    relation <- input$percentage
-
+    # Time is common component everywhere
+    periodStart <- input$timeInput[1]
+    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+    periodEnd <- input$timeInput[2]
+    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
     
     switch(pattern,
-      "1" = {
-        # Comment analysis
-        print("Starting comment analysis")
-        query <- commentAnalysis(
-          gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
-          upsMin = upVotesMin,
-          upsMax = upVotesMax,
-          timeFrom = periodStartPOSIX,
-          timeBefore = periodEndPOSIX,
-          subreddits = subreddits,
-          keywords = keywords
-        )
-        print(query)
-        res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        data <- convertTime(data)
-        print(head(data))
-        dbClearResult(res)
-        output$query_info <-renderText({query
-        })
-        output$query_results <-renderDataTable({data
-        })
-        
-        
-        #plotting
-        output$graph <- renderPlot({
-          if (input$separateSubreddits == FALSE) {
-            # All results
-            mass <- createAmountFrame(data, "time")
-            if (input$plotSelect == "1") {
-              ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
-                geom_bar(colour="black", width=.8, stat="identity") + 
-                geom_label(aes(label = freq), size = 4) +
-                guides(fill=FALSE) +
-                xlab("Time") + ylab("Frequency") +
-                ggtitle("Comment Analysis")
-            }
-            else if (input$plotSelect == "2") {
-              ggplot(data=mass, aes(x=factor(time), y=freq, group = 1)) +  
-                geom_line() + geom_point() +
-                xlab("Time") + ylab("Frequency") +
-                ggtitle("Comment Analysis")
-            }
-          }
-          else {
-            # Separating results by subreddits
-            mass <- createAmountFrame(data, c("subreddit", "time"))
-            if (input$plotSelect == "1") {
-              ggplot(data=mass, aes(x=time, y=freq, fill=subreddit)) + 
-                geom_bar(colour="black", width=.8, stat="identity") + 
-                xlab("Time") + ylab("Frequency") +
-                ggtitle("Comment Analysis by subreddits")
-            }
-            else if (input$plotSelect == "2") {
-              ggplot(data=mass, aes(x=factor(time), y=freq, group=subreddit, colour=subreddit, shape=subreddit)) +  
-                geom_line() + geom_point() +
-                xlab("Time") + ylab("Frequency") +
-                ggtitle("Comment Analysis")
-            }
-          }
-        })
-      },
-      "2" = {
-        # Users analysis
-        print("Starting users analysis")
-      },
-      "3" = {
-        # Subreddits analysis
-        print("Starting subreddits analysis")
-        query <- subredditsAnalysis(
-          gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
-          upsMin = upVotesMin,
-          upsMax = upVotesMax,
-          timeFrom = periodStartPOSIX,
-          timeBefore = periodEndPOSIX,
-          subreddits = subreddits,
-          keywords = keywords
-        )
-        print(query)
-        res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        data <- convertTime(data)
-        print(head(data))
-        dbClearResult(res)
-        
-        # Provide explicit colors for regions, so they don't get recoded when the
-        # different series happen to be ordered differently from year to year.
-        # http://andrewgelman.com/2014/09/11/mysterious-shiny-things/
-        defaultColors <- c("#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477")
-        series <- structure(
-          lapply(defaultColors, function(color) { list(color=color) })
-        )
-        
-        yearData <- reactive({
-          # Filter to the desired year, and put the columns
-          # in the order that Google's Bubble Chart expects
-          # them (name, x, y, color, size). Also sort by region
-          # so that Google Charts orders and colors the regions
-          # consistently.
-          df <- data %>%
-            # filter(Year == input$year) %>%
-            select(
-              subreddit, 
-              time,
-              1,
-              subreddit,
-              subreddit) %>%
-            arrange(subreddit)
-        })
-        
-        output$graph <- reactive({
-          # Return the data and options
-          list(
-            data = googleDataTable(yearData()),
-            options = list(
-              title = sprintf(
-                "Health expenditure vs. life expectancy, %s",
-                input$year),
-              series = series
-            )
-          )
-        })
-      },
-      "4" = {
-        # Subreddits relations
-        print("Starting subreddits relations analysis")
-        timer_variable <<- '1'
-        query <- subredditsRelations(
-          gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
-          upsMin = upVotesMin,
-          upsMax = upVotesMax,
-          timeFrom = periodStartPOSIX,
-          timeBefore = periodEndPOSIX,
-          subreddits = subreddits,
-          keywords = keywords,
-          percentage = relation
-        )
-        
-        timer_variable <<- '0'
-        res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        print(head(data))
-        dbClearResult(res)
-        print(data)
-        
-        output$query_info <-renderText({query
-        })
-        output$query_results <-renderDataTable({data
-        })
-        
-        #plotting
-        output$network <- renderSimpleNetwork({
-          subreddits_a <- data$subreddit_a
-          subreddits_b <- data$subreddit_b
-          networkData <- data.frame(subreddits_a, subreddits_b)
-          simpleNetwork(networkData, fontSize = 20)
-        })
-      },
-      "5" = {
-        # Frequency of words
-        print("Starting frequence of words")
-        query <- frequencyOfWords(
-          gilded = as.numeric(gilded),
-          downsMin = downVotesMin,
-          downsMax = downVotesMax,
-          upsMin = upVotesMin,
-          upsMax = upVotesMax,
-          timeFrom = periodStartPOSIX,
-          timeBefore = periodEndPOSIX,
-          subreddits = subreddits
-        )
-        print(query)
-        res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        dbClearResult(res)
-        output$query_info <-renderText({query
-        })
-        output$query_results <-renderDataTable({data
-        })
-        
-        corpus <- createCorpus(data, scheme$comment)
-        output$graph <- renderPlot({
-          wordcloud(
-            corpus, 
-            scale = c(3.5, 0.5),
-            min.freq = input$frequencyMin,
-            max.words = input$numberOfWordsMax, 
-            random.order = FALSE,
-            random.color = FALSE,
-            colors = brewer.pal(8, "Dark2")
-          )
-        })
-      },
-      {
-        # Default
-      }
+           "1" = {
+             # Comment analysis
+             print("Starting comment analysis")
+             # Taking input parameters
+             gilded <- input$isGilded
+             keywords <- input$keywordsInput
+             authors <- input$authorsInput
+             subreddits <- input$subredditsInput
+             upVotesMin <- input$ups[1]
+             upVotesMax <- input$ups[2]
+             # Making query
+             query <- commentAnalysis(
+               gilded = as.numeric(gilded),
+               upsMin = upVotesMin,
+               upsMax = upVotesMax,
+               timeFrom = periodStartPOSIX,
+               timeBefore = periodEndPOSIX,
+               subreddits = subreddits,
+               authors = authors,
+               keywords = keywords
+             )
+             print(query)
+             res <- dbSendQuery(con, query)
+             data <- fetch(res, n=-1)
+             data <- convertTime(data)
+             print(head(data))
+             dbClearResult(res)
+             
+             # Output query info and results
+             output$query_info <- renderText({
+               query
+             })
+             output$query_results <- renderDataTable({
+               data
+             })
+             
+             output$graph <- renderPlot({
+               if (input$separateSubreddits == FALSE) {
+                 # All results
+                 mass <- createAmountFrame(data, "time")
+                 if (input$plotSelect == "1") {
+                   ggplot(data=mass, aes(x=time, y=freq, fill=time)) + 
+                     geom_bar(colour="black", width=.8, stat="identity") + 
+                     geom_label(aes(label = freq), size = 4) +
+                     guides(fill=FALSE) +
+                     xlab("Time") + ylab("Frequency") +
+                     ggtitle("Comment Analysis")
+                 }
+                 else if (input$plotSelect == "2") {
+                   ggplot(data=mass, aes(x=factor(time), y=freq, group = 1)) +  
+                     geom_line() + geom_point() +
+                     xlab("Time") + ylab("Frequency") +
+                     ggtitle("Comment Analysis")
+                 }
+               }
+               else {
+                 # Separating results by subreddits
+                 mass <- createAmountFrame(data, c("subreddit", "time"))
+                 if (input$plotSelect == "1") {
+                   ggplot(data=mass, aes(x=time, y=freq, fill=subreddit)) + 
+                     geom_bar(colour="black", width=.8, stat="identity") + 
+                     xlab("Time") + ylab("Frequency") +
+                     ggtitle("Comment Analysis by subreddits")
+                 }
+                 else if (input$plotSelect == "2") {
+                   ggplot(data=mass, aes(x=factor(time), y=freq, group=subreddit, colour=subreddit, shape=subreddit)) +  
+                     geom_line() + geom_point() +
+                     xlab("Time") + ylab("Frequency") +
+                     ggtitle("Comment Analysis")
+                 }
+               }
+             })
+           },
+           "2" = {
+             # Subreddits relations
+             print("Starting subreddits relations analysis")
+             
+             # Taking input parameters
+             gilded <- input$isGilded
+             keywords <- input$keywordsInput
+             subreddits <- input$subredditsInput
+             upVotesMin <- input$ups[1]
+             upVotesMax <- input$ups[2]
+             relation <- input$percentage
+             timer_variable <<- '1'
+             
+             query <- subredditsRelations(
+               gilded = as.numeric(gilded),
+               upsMin = upVotesMin,
+               upsMax = upVotesMax,
+               timeFrom = periodStartPOSIX,
+               timeBefore = periodEndPOSIX,
+               subreddits = subreddits,
+               keywords = keywords,
+               percentage = relation
+             )
+             
+             timer_variable <<- '0'
+             res <- dbSendQuery(con, query)
+             data <- fetch(res, n=-1)
+             print(head(data))
+             dbClearResult(res)
+             
+             
+             # Output query info and results
+             output$query_info <- renderText({
+               query
+             })
+             output$query_results <- renderDataTable({
+               data
+             })
+             
+             #plotting
+             output$network <- renderSimpleNetwork({
+               subreddits_a <- data$subreddit_a
+               subreddits_b <- data$subreddit_b
+               networkData <- data.frame(subreddits_a, subreddits_b)
+               simpleNetwork(networkData, fontSize = 20)
+             })
+           },
+           "3" = {
+             # Frequency of words
+             print("Starting frequence of words")
+             # Taking input parametres
+             gilded <- input$isGilded
+             subreddits <- input$subredditsInput
+             upVotesMin <- input$ups[1]
+             upVotesMax <- input$ups[2]
+             # Making a query
+             query <- frequencyOfWords(
+               gilded = as.numeric(gilded),
+               upsMin = upVotesMin,
+               upsMax = upVotesMax,
+               timeFrom = periodStartPOSIX,
+               timeBefore = periodEndPOSIX,
+               subreddits = subreddits
+             )
+             print(query)
+             res <- dbSendQuery(con, query)
+             data <- fetch(res, n=-1)
+             dbClearResult(res)
+             
+             # Output query info and results
+             output$query_info <- renderText({
+               query
+             })
+             output$query_results <- renderDataTable({
+               data
+             })
+             
+             corpus <- createCorpus(data, scheme$comment)
+             output$graph <- renderPlot({
+               wordcloud(
+                 corpus, 
+                 scale = c(3.5, 0.5),
+                 min.freq = input$frequencyMin,
+                 max.words = input$numberOfWordsMax, 
+                 random.order = FALSE,
+                 random.color = FALSE,
+                 colors = brewer.pal(8, "Dark2")
+               )
+             })
+           },
+           {
+             # Default
+           }
     )
   })
   
-    
-  
   # Cleanup after closing session
   session$onSessionEnded(function() {
-    endTime <- Sys.time()
     print("Session closed...")
-    print(endTime - startTime)
     dbDisconnect(con)
   })
-}
+  }
 
 shinyApp(ui, server)
