@@ -109,10 +109,6 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
             selected = 1
           )
         )
-      ),
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
       )
     )
   )
@@ -272,10 +268,6 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             selected = 1
           )
         )
-      ),
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
       )
     )
   )
@@ -391,11 +383,6 @@ getFrequencyComponents <- function(startTime, endTime) {
             value = c(-50, 50)
           )
         )
-      ),
-      
-      actionButton(
-        "launchButton", 
-        label = "Release the Kraken!"
       )
     )
   )
@@ -461,6 +448,14 @@ getFrequencyPlotUI <- function() {
           uiOutput("queryInfoUI")
         )
       )
+    )
+  )
+}
+
+getDefaultPlotUI <- function() {
+  return(
+    tagList(
+      h4("There is nothing, because you haven't chosen a pattern.")
     )
   )
 }
