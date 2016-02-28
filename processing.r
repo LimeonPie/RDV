@@ -31,3 +31,20 @@ createCorpus <- function(data, column) {
   corpus <- tm_map(corpus, stemDocument)
   return(corpus)
 }
+
+createCorpusWithProgress <- function(data, column) {
+  withProgress(
+    message = 'Processing text...',
+    value = 1, {
+      corpus <- Corpus(VectorSource(data[, column]))
+      setProgress(message = "Converting to plain text...")
+      corpus <- tm_map(corpus, PlainTextDocument)
+      setProgress(message = "Removing punctuation...")
+      corpus <- tm_map(corpus, removePunctuation)
+      setProgress(message = "Removing stopwords...")
+      corpus <- tm_map(corpus, removeWords, stopwords('english'))
+      setProgress(message = "Final preparation...")
+      corpus <- tm_map(corpus, stemDocument)
+    })
+  return(corpus)
+}

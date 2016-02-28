@@ -187,14 +187,14 @@ server <- function(input, output, session) {
         data <- data.frame()
         withProgress(
           message = 'Sending query...',
-          value = 0, {
+          value = 1, {
             while(!dbHasCompleted(res)){
               chunk <- dbFetch(res, n = 500)
               chunk <- convertTime(chunk)
               data <- rbind(data, chunk)
-              setProgress(message = paste("Processing", nrow(data), "rows..."))
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
             }
-            setProgress(message = "Processing completed.")
+            setProgress(message = "Fetching completed.")
         })
         dbClearResult(res)
         
@@ -275,13 +275,13 @@ server <- function(input, output, session) {
         data <- data.frame()
         withProgress(
           message = 'Sending query...',
-          value = 0, {
+          value = 1, {
             while(!dbHasCompleted(res)){
               chunk <- dbFetch(res, n = 500)
               data <- rbind(data, chunk)
-              setProgress(message = paste("Processing", nrow(data), "rows..."))
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
             }
-            setProgress(message = "Processing completed.")
+            setProgress(message = "Fetching completed.")
           })
         dbClearResult(res)
         
@@ -327,15 +327,14 @@ server <- function(input, output, session) {
         data <- data.frame()
         withProgress(
           message = 'Sending query...',
-          value = 0, {
+          value = 1, {
             while(!dbHasCompleted(res)){
               chunk <- dbFetch(res, n = 500)
               data <- rbind(data, chunk)
-              setProgress(message = paste("Processing", nrow(data), "rows..."))
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
             }
-            setProgress(message = "Processing completed.")
+            setProgress(message = "Fetching completed.")
           })
-        dbClearResult(res)
         dbClearResult(res)
         
         # Output query info and results
@@ -346,7 +345,7 @@ server <- function(input, output, session) {
           data
         })
         
-        corpus <- createCorpus(data, scheme$comment)
+        corpus <- createCorpusWithProgress(data, scheme$comment)
         output$graph <- renderPlot({
           wordcloud(
             corpus, 
