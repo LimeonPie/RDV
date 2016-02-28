@@ -183,8 +183,19 @@ server <- function(input, output, session) {
         )
         print(query)
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        data <- convertTime(data)
+        # What if not taking all the data at once?
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 0, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              chunk <- convertTime(chunk)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Processing", nrow(data), "rows..."))
+            }
+            setProgress(message = "Processing completed.")
+        })
         dbClearResult(res)
         
         # Output query info and results
@@ -259,10 +270,19 @@ server <- function(input, output, session) {
           keywords = keywords,
           percentage = relation
         )
-        
-        timer_variable <<- '0'
+    
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 0, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Processing", nrow(data), "rows..."))
+            }
+            setProgress(message = "Processing completed.")
+          })
         dbClearResult(res)
         
         # Output query info and results
@@ -304,7 +324,18 @@ server <- function(input, output, session) {
         )
         print(query)
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 0, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Processing", nrow(data), "rows..."))
+            }
+            setProgress(message = "Processing completed.")
+          })
+        dbClearResult(res)
         dbClearResult(res)
         
         # Output query info and results
