@@ -234,14 +234,14 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "The percentage of the same commenters between two subreddits",
+          title = "The percentage of the shared commenters between two subreddits",
           status = "primary",
           sliderInput(
             "percentage",
             label = h4("Select percentage"),
             min = 0,
             max = 100,
-            value = 10
+            value = 50
           )
         )
       ),
