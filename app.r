@@ -106,6 +106,7 @@ server <- function(input, output, session) {
       },
       {
         # Default UI
+        getDefaultPlotUI()
       }
     )
   })
@@ -131,22 +132,38 @@ server <- function(input, output, session) {
     ggsave("plot.png")
   })
   
+  observeEvent(input$menu, {
+    switch(input$menu,
+      "default" = {
+        print("Default tab opened")
+      },
+      "conf" = {
+        print("Configuration tab opened")
+      },
+      "plot" = {
+        print("Plot tab opened")
+        processConfiguration()
+      },
+      {
+        print("Unknown tab opened")
+      }
+    )
+  })
+  
   # Launch Button onClick
-  observeEvent(input$launchButton, {
-    # Gathering input data
+  processConfiguration <- function() {
+  #observeEvent(input$launchButton, {
     # The main thing is pattern
     pattern <- input$patternSelect
-    # Time is common component everywhere
-    periodStart <- input$timeInput[1]
-    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-    periodEnd <- input$timeInput[2]
-    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
-    
     switch(pattern,
       "1" = {
         # Comment analysis
         print("Starting comment analysis")
         # Taking input parameters
+        periodStart <- input$timeInput[1]
+        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+        periodEnd <- input$timeInput[2]
+        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         authors <- input$authorsInput
@@ -166,9 +183,19 @@ server <- function(input, output, session) {
         )
         print(query)
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        data <- convertTime(data)
-        print(head(data))
+        # What if not taking all the data at once?
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 1, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              chunk <- convertTime(chunk)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
+            }
+            setProgress(message = "Fetching completed.")
+        })
         dbClearResult(res)
         
         # Output query info and results
@@ -221,6 +248,10 @@ server <- function(input, output, session) {
         print("Starting subreddits relations analysis")
         
         # Taking input parameters
+        periodStart <- input$timeInput[1]
+        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+        periodEnd <- input$timeInput[2]
+        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         subreddits <- input$subredditsInput
@@ -239,13 +270,20 @@ server <- function(input, output, session) {
           keywords = keywords,
           percentage = relation
         )
-        
-        timer_variable <<- '0'
+    
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
-        print(head(data))
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 1, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
+            }
+            setProgress(message = "Fetching completed.")
+          })
         dbClearResult(res)
-        
         
         # Output query info and results
         output$query_info <- renderText({
@@ -267,6 +305,10 @@ server <- function(input, output, session) {
         # Frequency of words
         print("Starting frequence of words")
         # Taking input parametres
+        periodStart <- input$timeInput[1]
+        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+        periodEnd <- input$timeInput[2]
+        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
         upVotesMin <- input$ups[1]
@@ -282,7 +324,17 @@ server <- function(input, output, session) {
         )
         print(query)
         res <- dbSendQuery(con, query)
-        data <- fetch(res, n=-1)
+        data <- data.frame()
+        withProgress(
+          message = 'Sending query...',
+          value = 1, {
+            while(!dbHasCompleted(res)){
+              chunk <- dbFetch(res, n = 500)
+              data <- rbind(data, chunk)
+              setProgress(message = paste("Fetching", nrow(data), "rows..."))
+            }
+            setProgress(message = "Fetching completed.")
+          })
         dbClearResult(res)
         
         # Output query info and results
@@ -293,7 +345,7 @@ server <- function(input, output, session) {
           data
         })
         
-        corpus <- createCorpus(data, scheme$comment)
+        corpus <- createCorpusWithProgress(data, scheme$comment)
         output$graph <- renderPlot({
           wordcloud(
             corpus, 
@@ -310,8 +362,8 @@ server <- function(input, output, session) {
         # Default
       }
     )
-  })
-  
+  #})
+  }
   # Cleanup after closing session
   session$onSessionEnded(function() {
     print("Session closed...")

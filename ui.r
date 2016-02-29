@@ -12,6 +12,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     width = 300,
     sidebarMenu(
+      id = "menu",
       menuItem(
         "Home",
         tabName = "default",
