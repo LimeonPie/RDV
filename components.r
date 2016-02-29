@@ -194,7 +194,7 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             min = startTime, 
             max = endTime
           ),
-          h5("Warning! Selecting a long perioid will gradually affect processing time.")
+          h5("Warning! Selecting a long period will gradually affect processing time.")
         ),
         box(
           title = strings$subredditsTitle,
@@ -230,14 +230,14 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "Percentage for subreddit relations",
+          title = "The percentage of the shared commenters between two subreddits",
           status = "primary",
           sliderInput(
             "percentage",
             label = h4("Select percentage"),
             min = 0,
             max = 100,
-            value = 10
+            value = 50
           )
         )
       ),
@@ -339,7 +339,7 @@ getFrequencyComponents <- function(startTime, endTime) {
             min = startTime, 
             max = endTime
           ),
-          h5("Warning! Selecting a long perioid will gradually affect processing time.")
+          h5("Warning! Selecting a long period will gradually affect processing time.")
         ),
         box(
           title = strings$subredditsTitle,

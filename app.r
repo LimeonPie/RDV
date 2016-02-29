@@ -18,7 +18,6 @@ source('./components.r')
 # port=3306
 
 server <- function(input, output, session) {
-  startTime <- Sys.time()
   
   # Insert your user and password
   con <- dbConnect(
@@ -57,7 +56,7 @@ server <- function(input, output, session) {
   output$patternDescription <- renderText({
     switch(input$patternSelect,
       "1" = "Amount of comments description",
-      "2" = "Subreddit relations description",
+      "2" = "Subreddit relations pattern draws a node chart about how subreddits are connected. For example, if there are at least 50% shared commenters, an edge is plotted. The amount of shared commenters is compared to the mean of the two subreddits. The percentage of shared commenters can be adjusted below.",
       "3" = "Frequency of words description",
       "Please select the desired type of data processing and define input parametres.
       The description of patter will appear here."
@@ -258,7 +257,6 @@ server <- function(input, output, session) {
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         relation <- input$percentage
-        timer_variable <<- '1'
         
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
@@ -270,7 +268,7 @@ server <- function(input, output, session) {
           keywords = keywords,
           percentage = relation
         )
-    
+
         res <- dbSendQuery(con, query)
         data <- data.frame()
         withProgress(
