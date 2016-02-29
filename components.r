@@ -198,7 +198,7 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             min = startTime, 
             max = endTime
           ),
-          h5("Warning! Selecting a long perioid will gradually affect processing time.")
+          h5("Warning! Selecting a long period will gradually affect processing time.")
         ),
         box(
           title = strings$subredditsTitle,
@@ -234,7 +234,7 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "Percentage for subreddit relations",
+          title = "The percentage of the same commenters between two subreddits",
           status = "primary",
           sliderInput(
             "percentage",
@@ -347,7 +347,7 @@ getFrequencyComponents <- function(startTime, endTime) {
             min = startTime, 
             max = endTime
           ),
-          h5("Warning! Selecting a long perioid will gradually affect processing time.")
+          h5("Warning! Selecting a long period will gradually affect processing time.")
         ),
         box(
           title = strings$subredditsTitle,

@@ -56,7 +56,7 @@ server <- function(input, output, session) {
   output$patternDescription <- renderText({
     switch(input$patternSelect,
       "1" = "Amount of comments description",
-      "2" = "Subreddit relations description",
+      "2" = "Subreddit relations pattern draws a node chart about how subreddits are connected. For example, if there are at least 50% shared commenters, an edge is plotted. The amount of shared commenters is compared to the mean of the two subreddits. The percentage of shared commenters can be adjusted below.",
       "3" = "Frequency of words description",
       "Please select the desired type of data processing and define input parametres.
       The description of patter will appear here."
@@ -227,6 +227,9 @@ server <- function(input, output, session) {
         upVotesMax <- input$ups[2]
         relation <- input$percentage
         
+        #subreddits <- dbEscapeStrings(con, subreddits)
+        #keywords <- dbEscapeStrings(con, keywords)
+        
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
           upsMin = upVotesMin,
@@ -237,6 +240,8 @@ server <- function(input, output, session) {
           keywords = keywords,
           percentage = relation
         )
+        
+        #query <- dbEscapeStrings(con, query)
         
         res <- dbSendQuery(con, query)
         data <- fetch(res, n=-1)
