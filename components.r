@@ -147,8 +147,8 @@ getCommentAnalysisPlotUI <- function() {
             label = "Separate subreddits", 
             value = FALSE
           ),
-          actionButton(
-            "save", 
+          downloadButton(
+            "downloadPlot", 
             label = "Save"
           ),
           textOutput("timer")
@@ -292,8 +292,8 @@ getSubredditRelationsPlotUI <- function() {
           status = "primary",
           solidHeader = TRUE,
           width = 4,
-          actionButton(
-            "save", 
+          downloadButton(
+            "downloadPlot", 
             label = "Save"
           ),
           textOutput("timer")
@@ -421,8 +421,8 @@ getFrequencyPlotUI <- function() {
             max = 100,
             value = 50
           ),
-          actionButton(
-            "save", 
+          downloadButton(
+            "downloadPlot", 
             label = "Save"
           ),
           textOutput("timer")
