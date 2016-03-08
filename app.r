@@ -127,11 +127,6 @@ server <- function(input, output, session) {
     )
   })
   
-  # Save button onClick
-  observeEvent(input$save, {
-    ggsave("plot.png")
-  })
-  
   observeEvent(input$menu, {
     switch(input$menu,
       "default" = {
@@ -139,6 +134,7 @@ server <- function(input, output, session) {
       },
       "conf" = {
         print("Configuration tab opened")
+        
       },
       "plot" = {
         print("Plot tab opened")
@@ -206,7 +202,7 @@ server <- function(input, output, session) {
           data
         })
         
-        output$graph <- renderPlot({
+        makePlot <- function(){
           if (input$separateSubreddits == FALSE) {
             # All results
             mass <- createAmountFrame(data, "time")
@@ -241,6 +237,16 @@ server <- function(input, output, session) {
                 ggtitle("Comment Analysis")
             }
           }
+        }
+        
+        savePlot <- function(file) {
+          ggsave(file)
+          p <- makePlot()
+          print(p)
+        }
+        
+        output$graph <- renderPlot({
+          makePlot()
         })
       },
       "2" = {
@@ -293,12 +299,23 @@ server <- function(input, output, session) {
           data
         })
         
+        networkData <- data.frame(data$subreddit_a, data$subreddit_b)
+        
+        makePlot <- function(){
+          simpleNetwork(
+            networkData, 
+            fontSize = 20
+          )
+        }
+        
+        savePlot <- function(file) {
+          png(file)
+          makePlot()
+        }
+        
         #plotting
         output$network <- renderSimpleNetwork({
-          subreddits_a <- data$subreddit_a
-          subreddits_b <- data$subreddit_b
-          networkData <- data.frame(subreddits_a, subreddits_b)
-          simpleNetwork(networkData, fontSize = 20)
+          makePlot()
         })
       },
       "3" = {
@@ -346,7 +363,8 @@ server <- function(input, output, session) {
         })
         
         corpus <- createCorpusWithProgress(data, scheme$comment)
-        output$graph <- renderPlot({
+        
+        makePlot <- function(){
           wordcloud(
             corpus, 
             scale = c(3.5, 0.5),
@@ -356,14 +374,34 @@ server <- function(input, output, session) {
             random.color = FALSE,
             colors = brewer.pal(8, "Dark2")
           )
+        }
+        
+        savePlot <- function(file) {
+          png(file)
+          makePlot()
+        }
+        
+        output$graph <- renderPlot({
+          makePlot()
         })
+        
       },
       {
         # Default
       }
     )
-  #})
+    # Creating saving behaviour
+    output$downloadPlot <- downloadHandler(
+      filename = function() { 
+        "output.png" 
+      },
+      content = function(file) {
+        savePlot(file)
+        dev.off()
+      }
+    )
   }
+  
   # Cleanup after closing session
   session$onSessionEnded(function() {
     print("Session closed...")
