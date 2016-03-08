@@ -112,7 +112,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   
   # Subreddits condition
   if (!is.null(subreddits)) {
-    base <- c(base, getValueIn(dbEscapeStrings(scheme$subreddit), subreddits), " AND ")
+    base <- c(base, getValueIn(scheme$subreddit, subreddits), " AND ")
   }
   
   # Keywords condition
