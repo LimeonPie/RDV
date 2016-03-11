@@ -55,9 +55,9 @@ server <- function(input, output, session) {
   
   output$patternDescription <- renderText({
     switch(input$patternSelect,
-      "1" = "Amount of comments description",
+      "1" = "Amount of comments pattern draws a bar or line chart of the amount of comments from chosen subreddits. The results can also be limited to those which include given keywords or authors.",
       "2" = "Subreddit relations pattern draws a node chart about how subreddits are connected. For example, if there are at least 50% shared commenters, an edge is plotted. The amount of shared commenters is compared to the mean of the two subreddits. The percentage of shared commenters can be adjusted below.",
-      "3" = "Frequency of words description",
+      "3" = "Frequency of words pattern draws a word cloud of the most used words within chosen subreddits.",
       "Please select the desired type of data processing and define input parametres.
       The description of patter will appear here."
     )
