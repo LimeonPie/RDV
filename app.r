@@ -4,6 +4,7 @@ library(RMySQL)
 library(ggplot2)
 library(wordcloud)
 library(networkD3)
+library(igraph)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -300,13 +301,16 @@ server <- function(input, output, session) {
           data
         })
         
-        networkData <- data.frame(data$subreddit_a, data$subreddit_b)
+        networkData <- graph.data.frame(data, directed = TRUE)
+        print(networkData)
+        #networkData <- data.frame(data$subreddit_a, data$subreddit_b)
         
         makePlot <- function(){
-          simpleNetwork(
-            networkData, 
-            fontSize = 20
-          )
+          plot.igraph(networkData)
+          #simpleNetwork(
+            #networkData, 
+            #fontSize = 20
+          #)
         }
         
         savePlot <- function(file) {
@@ -315,7 +319,7 @@ server <- function(input, output, session) {
         }
         
         #plotting
-        output$network <- renderSimpleNetwork({
+        output$network <- renderPlot({
           makePlot()
         })
       },

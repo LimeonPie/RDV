@@ -282,7 +282,7 @@ getSubredditRelationsPlotUI <- function() {
           width = 8,
           status = "primary", 
           solidHeader = TRUE,
-          simpleNetworkOutput(
+          plotOutput(
             "network", 
             height = 250
           )
