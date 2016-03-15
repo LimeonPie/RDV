@@ -266,6 +266,7 @@ server <- function(input, output, session) {
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         relation <- input$percentage
+        minSubreddit <- input$minSubredditSize
         
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
@@ -275,7 +276,8 @@ server <- function(input, output, session) {
           timeBefore = periodEndPOSIX,
           subreddits = subreddits,
           keywords = keywords,
-          percentage = relation
+          percentage = relation,
+          minSub = minSubreddit
         )
 
         res <- dbSendQuery(con, query)
@@ -315,18 +317,13 @@ server <- function(input, output, session) {
         }
         
         #plotting, if there is no data text is written
-        if(nrow(networkData)!= 0){
           output$network <- renderSimpleNetwork({
+            validate(
+              need(nrow(networkData)!= 0, "The query is empty so a plot is not drawn.")
+            )
             makePlot()
           })
-        } else {
-          output$network <- renderSimpleNetwork({
-            makePlot()
-          })
-          output$subredditAnalysisText <- renderText({
-            "The data is empty. Adjust the parameters."
-          })
-        }
+          
         
       },
       "3" = {
