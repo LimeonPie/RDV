@@ -314,10 +314,20 @@ server <- function(input, output, session) {
           makePlot()
         }
         
-        #plotting
-        output$network <- renderSimpleNetwork({
-          makePlot()
-        })
+        #plotting, if there is no data text is written
+        if(nrow(networkData)!= 0){
+          output$network <- renderSimpleNetwork({
+            makePlot()
+          })
+        } else {
+          output$network <- renderSimpleNetwork({
+            makePlot()
+          })
+          output$subredditAnalysisText <- renderText({
+            "The data is empty. Adjust the parameters."
+          })
+        }
+        
       },
       "3" = {
         # Frequency of words
