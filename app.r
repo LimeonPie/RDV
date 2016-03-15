@@ -194,9 +194,6 @@ server <- function(input, output, session) {
         })
         dbClearResult(res)
         
-        test <- createAmountFrame(data, c("subreddit", "author"))
-        print(test)
-        
         # Output query info and results
         output$query_info <- renderText({
           query
