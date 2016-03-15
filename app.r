@@ -268,6 +268,7 @@ server <- function(input, output, session) {
         relation <- input$percentage
         minSubreddit <- input$minSubredditSize
         
+        #Making a query
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
           upsMin = upVotesMin,
@@ -312,7 +313,7 @@ server <- function(input, output, session) {
         }
         
         savePlot <- function(file) {
-          png(file)
+          saveNetwork(file)
           makePlot()
         }
         
@@ -398,16 +399,31 @@ server <- function(input, output, session) {
         # Default
       }
     )
+    
     # Creating saving behaviour
-    output$downloadPlot <- downloadHandler(
-      filename = function() { 
-        "output.png" 
-      },
-      content = function(file) {
-        savePlot(file)
-        dev.off()
-      }
-    )
+    
+    if(input$patternSelect != 2){
+      output$downloadPlot <- downloadHandler(
+        filename = function() { 
+          "output.png" 
+        },
+        content = function(file) {
+          savePlot(file)
+          dev.off()
+        }
+      )
+    } else {
+      output$downloadPlot <- downloadHandler(
+        filename = function() { 
+          "output.html" 
+        },
+        content = function(file) {
+          savePlot(file)
+          dev.off()
+        }
+      )
+    }
+    
   }
   
   # Cleanup after closing session

@@ -291,7 +291,8 @@ getSubredditRelationsPlotUI <- function() {
           solidHeader = TRUE,
           simpleNetworkOutput(
             "network", 
-            height = 500)
+            height = 500,
+            zoom = TRUE)
         ),
         
         box(
