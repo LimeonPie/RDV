@@ -20,6 +20,9 @@ source('./components.r')
 
 server <- function(input, output, session) {
   
+  # The amount of data to process with each request
+  chunkSize <- 500
+  
   # Insert your user and password
   con <- dbConnect(
     MySQL(),
@@ -148,18 +151,23 @@ server <- function(input, output, session) {
   
   # Launch Button onClick
   processConfiguration <- function() {
-  #observeEvent(input$launchButton, {
-    # The main thing is pattern
+    # Common input parametres
     pattern <- input$patternSelect
+    periodStart <- input$timeInput[1]
+    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
+    periodEnd <- input$timeInput[2]
+    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
+    # If user put end date before start, swap them
+    if (periodEndPOSIX < periodStartPOSIX) {
+      tmp <- periodEndPOSIX
+      periodEndPOSIX <- periodStartPOSIX
+      periodStartPOSIX <- tmp
+    }
     switch(pattern,
       "1" = {
         # Comment analysis
         print("Starting comment analysis")
         # Taking input parameters
-        periodStart <- input$timeInput[1]
-        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-        periodEnd <- input$timeInput[2]
-        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         authors <- input$authorsInput
@@ -185,7 +193,7 @@ server <- function(input, output, session) {
           message = 'Sending query...',
           value = 1, {
             while(!dbHasCompleted(res)){
-              chunk <- dbFetch(res, n = 500)
+              chunk <- dbFetch(res, n = chunkSize)
               chunk <- convertTime(chunk)
               data <- rbind(data, chunk)
               setProgress(message = paste("Fetching", nrow(data), "rows..."))
@@ -254,10 +262,6 @@ server <- function(input, output, session) {
         print("Starting subreddits relations analysis")
         
         # Taking input parameters
-        periodStart <- input$timeInput[1]
-        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-        periodEnd <- input$timeInput[2]
-        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         subreddits <- input$subredditsInput
@@ -282,7 +286,7 @@ server <- function(input, output, session) {
           message = 'Sending query...',
           value = 1, {
             while(!dbHasCompleted(res)){
-              chunk <- dbFetch(res, n = 500)
+              chunk <- dbFetch(res, n = chunkSize)
               data <- rbind(data, chunk)
               setProgress(message = paste("Fetching", nrow(data), "rows..."))
             }
@@ -324,10 +328,6 @@ server <- function(input, output, session) {
         # Frequency of words
         print("Starting frequence of words")
         # Taking input parametres
-        periodStart <- input$timeInput[1]
-        periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-        periodEnd <- input$timeInput[2]
-        periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
         upVotesMin <- input$ups[1]
@@ -348,7 +348,7 @@ server <- function(input, output, session) {
           message = 'Sending query...',
           value = 1, {
             while(!dbHasCompleted(res)){
-              chunk <- dbFetch(res, n = 500)
+              chunk <- dbFetch(res, n = chunkSize)
               data <- rbind(data, chunk)
               setProgress(message = paste("Fetching", nrow(data), "rows..."))
             }
