@@ -399,7 +399,7 @@ getFrequencyPlotUI <- function() {
           solidHeader = TRUE,
           plotOutput(
             "graph", 
-            height = 250
+            height = 350
           )
         ),
         box(

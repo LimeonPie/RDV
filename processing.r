@@ -4,6 +4,13 @@
 library(tm)
 library(SnowballC)
 
+customStopwords <- c(
+  "dont", "doesnt", "ive", "ill", "iam", "arent",
+  "shouldnt", "havent", "didnt", "hasnt", "hadnt",
+  "like", "think", "really", "deleted", "youre",
+  "isnt", "theyre", "wouldnt", "hes", "shes"
+)
+
 convertTime <- function(data) {
   # convert created_utc from POSIX to month, year
   data$time <- as.POSIXct("1970-01-01", origin="1970-01-01")
@@ -25,8 +32,8 @@ createAmountFrame <- function(data, column) {
 
 createCorpus <- function(data, column) {
   corpus <- Corpus(VectorSource(data[, column]))
-  corpus <- tm_map(corpus, PlainTextDocument)
   corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, PlainTextDocument)
   corpus <- tm_map(corpus, removeWords, stopwords('english'))
   corpus <- tm_map(corpus, stemDocument)
   return(corpus)
@@ -38,13 +45,19 @@ createCorpusWithProgress <- function(data, column) {
     value = 1, {
       corpus <- Corpus(VectorSource(data[, column]))
       setProgress(message = "Converting to plain text...")
-      corpus <- tm_map(corpus, PlainTextDocument)
+      corpus <- tm_map(corpus, content_transformer(tolower))
       setProgress(message = "Removing punctuation...")
       corpus <- tm_map(corpus, removePunctuation)
+      setProgress(message = "Removing numbers...")
+      corpus <- tm_map(corpus, removeNumbers)
       setProgress(message = "Removing stopwords...")
-      corpus <- tm_map(corpus, removeWords, stopwords('english'))
+      corpus <- tm_map(corpus, removeWords, c(stopwords("en"), stopwords("SMART"), customStopwords))
       setProgress(message = "Final preparation...")
-      corpus <- tm_map(corpus, stemDocument)
+      # Stemming
+      #dictCorpus <- corpus
+      #corpus <- tm_map(corpus, stemDocument)
+      #corpus <- tm_map(corpus, stemCompletion, dictionary = dictCorpus)
+      #dtm <- TermDocumentMatrix(corpus, control = list(minWordLength = 1))
     })
   return(corpus)
 }

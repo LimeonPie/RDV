@@ -61,6 +61,9 @@ commentAnalysis <- function(gilded = NULL, upsMin = NULL,
     base <- c(base, searchValue(scheme$author, authors), " AND ")
   }
   
+  # Removing [deleted] authors
+  base <- c(base, getValueNotEqual(scheme$author, "'[deleted]'"), " AND ")
+  
   # Keywords condition (in comment field)
   if (!is.null(keywords)) {
     base <- c(base, searchValue(scheme$comment, keywords), " AND ")
@@ -114,6 +117,9 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   if (!is.null(subreddits)) {
     base <- c(base, getValueIn(scheme$subreddit, subreddits), " AND ")
   }
+  
+  # Removing [deleted] authors
+  base <- c(base, getValueNotEqual(scheme$author, "'[deleted]'"), " AND ")
   
   # Keywords condition
   if (!is.null(keywords)) {
@@ -187,6 +193,9 @@ frequencyOfWords <- function(gilded = NULL, upsMin = NULL,
     base <- c(base, getValueLess(scheme$upVotes, upsMax), " AND ")
   }
   
+  # Removing [deleted] authors
+  base <- c(base, getValueNotEqual(scheme$author, "'[deleted]'"), " AND ")
+  
   # Removing the last element in query (" AND ")
   # And putting the end to it
   base <- base[-length(base)]
@@ -203,6 +212,12 @@ getValueMore <- function(value, minValue) {
 
 getValueEqual <- function(value, equalValue) {
   base <- c(value, "=", equalValue)
+  query <- paste(base, sep = "", collapse = "")
+  return(query)
+}
+
+getValueNotEqual <- function(value, notEqualValue) {
+  base <- c(value, "<>", notEqualValue)
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }

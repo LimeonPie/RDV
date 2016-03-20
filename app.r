@@ -153,10 +153,19 @@ server <- function(input, output, session) {
   processConfiguration <- function() {
     # Common input parametres
     pattern <- input$patternSelect
-    periodStart <- input$timeInput[1]
-    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, tz = "UTC"))
-    periodEnd <- input$timeInput[2]
-    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, tz = "UTC"))
+    periodStart <- strptime(input$timeInput[1],"%Y-%m-%d")
+    periodEnd <- strptime(input$timeInput[2],"%Y-%m-%d")
+    # If user put times out of range
+    if (periodStart < startTime$time || periodStart > endTime$time) {
+      periodStart <- startTime$time
+      print("Start date out of range, fixing")
+    }
+    if (periodEnd < startTime$time || periodEnd > endTime$time) {
+      periodEnd <- endTime$time
+      print("End date out of range, fixing")
+    }
+    periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, origin="1970-01-01", tz = "GMT"))
+    periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, origin="1970-01-01", tz = "GMT"))
     # If user put end date before start, swap them
     if (periodEndPOSIX < periodStartPOSIX) {
       tmp <- periodEndPOSIX
@@ -303,15 +312,20 @@ server <- function(input, output, session) {
         })
         
         networkData <- graph.data.frame(data, directed = TRUE)
+        adjacencyMatrix <- table(data)
         print(networkData)
         #networkData <- data.frame(data$subreddit_a, data$subreddit_b)
         
         makePlot <- function(){
-          plot.igraph(networkData)
-          #simpleNetwork(
-            #networkData, 
-            #fontSize = 20
-          #)
+          plot(
+            networkData,
+            layout = layout.fruchterman.reingold,
+            vertex.size = 10,
+            vertex.color = "red",
+            vertex.shape = "circle",
+            edge.width = 3,
+            edge.curved = TRUE
+          )
         }
         
         savePlot <- function(file) {
@@ -322,7 +336,7 @@ server <- function(input, output, session) {
         #plotting
         output$network <- renderPlot({
           makePlot()
-        })
+        }, res = 100)
       },
       "3" = {
         # Frequency of words
@@ -369,12 +383,13 @@ server <- function(input, output, session) {
         makePlot <- function(){
           wordcloud(
             corpus, 
-            scale = c(3.5, 0.5),
+            scale = c(3.0, 0.2),
             min.freq = input$frequencyMin,
             max.words = input$numberOfWordsMax, 
             random.order = FALSE,
             random.color = FALSE,
-            colors = brewer.pal(8, "Dark2")
+            colors = brewer.pal(5, "Dark2"),
+            rot.per = 0.15
           )
         }
         
@@ -385,7 +400,7 @@ server <- function(input, output, session) {
         
         output$graph <- renderPlot({
           makePlot()
-        })
+        }, res = 110)
         
       },
       {
