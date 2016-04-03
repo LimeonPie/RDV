@@ -141,7 +141,7 @@ server <- function(input, output, session) {
       },
       "plot" = {
         print("Plot tab opened")
-        processConfiguration()
+        if (input$patternSelect != "0") processConfiguration()
       },
       {
         print("Unknown tab opened")
