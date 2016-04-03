@@ -5,6 +5,7 @@ library(ggplot2)
 library(wordcloud)
 library(networkD3)
 library(igraph)
+library(shinyBS)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -128,6 +129,16 @@ server <- function(input, output, session) {
         # Default empty
       }
     )
+  })
+  
+  observeEvent(input$plotButton, {
+    #menu-tab is changed to "plot" when plotButton in configurations page is clicked 
+    updateTabItems(session, "menu", "plot")
+  })
+  
+  observeEvent(input$backButton, {
+    #menu-tab is changed to "configurations" when backButton in plot page is clicked 
+    updateTabItems(session, "menu", "conf")
   })
   
   observeEvent(input$menu, {

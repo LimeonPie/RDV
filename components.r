@@ -83,17 +83,21 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
         )
       ),
       
-      fluidRow(  
-        box(
-          title = "Upvotes",
+      fluidRow(
+        tabBox(
+          title = "Votes",
           status = "primary",
-          sliderInput(
-            "ups", 
-            label = h4("Select a range of upvotes"), 
-            min = -50, 
-            max = 50, 
-            value = c(-50, 50)
+          tabPanel(
+            "Ups",
+            numericInput("maxUps", label = h4("Max"), value = NULL),
+            numericInput("minUps", label = h4("Min"), value = NULL)
+          ),
+          tabPanel(
+            "Downs",
+            numericInput("maxDowns", label = h4("Max"), value = NULL),
+            numericInput("minDowns", label = h4("Min"), value = NULL)
           )
+          
         ),
         box(
           title = strings$goldTitle,
@@ -108,7 +112,27 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
             ), 
             selected = 1
           )
+        ),
+        box(
+          title = "Upvotes",
+          status = "primary",
+          sliderInput(
+            "ups", 
+            label = h4("Select a range of upvotes"), 
+            min = -50, 
+            max = 50, 
+            value = c(-50, 50)
+          )
         )
+      ),
+      fluidRow(
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("plotButton", label = "Plot", size = "large", style = "success")),
+        column(width = 4)
       )
     )
   )
@@ -147,9 +171,12 @@ getCommentAnalysisPlotUI <- function() {
             label = "Separate subreddits", 
             value = FALSE
           ),
-          downloadButton(
+          br(),
+          bsButton(
             "downloadPlot", 
-            label = "Save"
+            label = "Save",
+            icon = icon("floppy-save", lib = "glyphicon"),
+            size = "large"
           )
         )
       ),
@@ -169,9 +196,17 @@ getCommentAnalysisPlotUI <- function() {
             ),
             selected = 1
           ),
-          
           uiOutput("queryInfoUI")
         )
+      ),
+      fluidRow(
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("backButton", label = "Back", size = "large", style = "danger")),
+        column(width = 4)
       )
     )
   )
@@ -275,6 +310,17 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             selected = 1
           )
         )
+      ),
+      
+      fluidRow(
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("plotButton", label = "Plot", size = "large", style = "success")
+          ),
+        column(width = 4)
       )
     )
   )
@@ -299,9 +345,11 @@ getSubredditRelationsPlotUI <- function() {
           status = "primary",
           solidHeader = TRUE,
           width = 4,
-          downloadButton(
+          bsButton(
             "downloadPlot", 
-            label = "Save"
+            label = "Save",
+            icon = icon("floppy-save", lib = "glyphicon"),
+            size = "large"
           )
         )
       ),
@@ -324,6 +372,15 @@ getSubredditRelationsPlotUI <- function() {
           
           uiOutput("queryInfoUI")
         )
+      ),
+      fluidRow(
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("backButton", label = "Back", size = "large", style = "danger")),
+        column(width = 4)
       )
     )
   )
@@ -389,6 +446,17 @@ getFrequencyComponents <- function(startTime, endTime) {
             value = c(-50, 50)
           )
         )
+      ),
+      fluidRow(
+        #the columns center the actionbutton
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("plotButton", label = "Plot", size = "large", style = "success")
+          ),
+        column(width = 4)
       )
     )
   )
@@ -427,9 +495,12 @@ getFrequencyPlotUI <- function() {
             max = 100,
             value = 50
           ),
-          downloadButton(
+          br(),
+          bsButton(
             "downloadPlot", 
-            label = "Save"
+            label = "Save",
+            icon = icon("floppy-save", lib = "glyphicon"),
+            size = "large"
           ),
           textOutput("timer")
         )
@@ -453,6 +524,15 @@ getFrequencyPlotUI <- function() {
           
           uiOutput("queryInfoUI")
         )
+      ),
+      fluidRow(
+        column(width = 4),
+        column(
+          width = 4,
+          offset = 0,
+          align = "center",
+          bsButton("backButton", label = "Back", size = "large", style = "danger")),
+        column(width = 4)
       )
     )
   )
