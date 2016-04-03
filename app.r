@@ -268,6 +268,7 @@ server <- function(input, output, session) {
       },
       "2" = {
         # Subreddits relations
+        # using atm D3Network to plot 
         print("Starting subreddits relations analysis")
         
         # Taking input parameters
@@ -277,7 +278,9 @@ server <- function(input, output, session) {
         upVotesMin <- input$ups[1]
         upVotesMax <- input$ups[2]
         relation <- input$percentage
+        minSubreddit <- input$minSubredditSize
         
+        #Making a query
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
           upsMin = upVotesMin,
@@ -286,7 +289,8 @@ server <- function(input, output, session) {
           timeBefore = periodEndPOSIX,
           subreddits = subreddits,
           keywords = keywords,
-          percentage = relation
+          percentage = relation,
+          minSub = minSubreddit
         )
 
         res <- dbSendQuery(con, query)
@@ -311,32 +315,43 @@ server <- function(input, output, session) {
           data
         })
         
-        networkData <- graph.data.frame(data, directed = TRUE)
-        adjacencyMatrix <- table(data)
+        #networkData <- graph.data.frame(data, directed = TRUE)
+        #adjacencyMatrix <- table(data)
+        networkData <- data.frame(data$subreddit_a, data$subreddit_b)
         print(networkData)
-        #networkData <- data.frame(data$subreddit_a, data$subreddit_b)
+        
+        #makePlot <- function(){
+        #  plot(
+        #    networkData,
+        #    layout = layout.fruchterman.reingold,
+        #    vertex.size = 10,
+        #    vertex.color = "red",
+        #    vertex.shape = "circle",
+        #    edge.width = 3,
+        #    edge.curved = TRUE
+        #  )
+        #}
         
         makePlot <- function(){
-          plot(
-            networkData,
-            layout = layout.fruchterman.reingold,
-            vertex.size = 10,
-            vertex.color = "red",
-            vertex.shape = "circle",
-            edge.width = 3,
-            edge.curved = TRUE
+          simpleNetwork(
+            networkData, 
+            fontSize = 20
           )
         }
         
         savePlot <- function(file) {
-          png(file)
+          saveNetwork(file)
           makePlot()
         }
         
-        #plotting
-        output$network <- renderPlot({
-          makePlot()
-        }, res = 100)
+        #plotting, if there is no data text is written
+          output$network <- renderSimpleNetwork({
+            validate(
+              need(nrow(networkData)!= 0, "The query is empty so a plot is not drawn.")
+            )
+            makePlot()
+          })
+          
       },
       "3" = {
         # Frequency of words
@@ -407,16 +422,31 @@ server <- function(input, output, session) {
         # Default
       }
     )
+    
     # Creating saving behaviour
-    output$downloadPlot <- downloadHandler(
-      filename = function() { 
-        "output.png" 
-      },
-      content = function(file) {
-        savePlot(file)
-        dev.off()
-      }
-    )
+    
+    if(input$patternSelect != 2){
+      output$downloadPlot <- downloadHandler(
+        filename = function() { 
+          "output.png" 
+        },
+        content = function(file) {
+          savePlot(file)
+          dev.off()
+        }
+      )
+    } else {
+      output$downloadPlot <- downloadHandler(
+        filename = function() { 
+          "output.html" 
+        },
+        content = function(file) {
+          savePlot(file)
+          dev.off()
+        }
+      )
+    }
+    
   }
   
   # Cleanup after closing session

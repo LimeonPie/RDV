@@ -150,8 +150,7 @@ getCommentAnalysisPlotUI <- function() {
           downloadButton(
             "downloadPlot", 
             label = "Save"
-          ),
-          textOutput("timer")
+          )
         )
       ),
       fluidRow(
@@ -181,6 +180,25 @@ getCommentAnalysisPlotUI <- function() {
 getSubredditRelationsComponents <- function(startTime, endTime) {
   return(
     tagList(
+      fluidRow(
+        box(
+          title = "Shared commenters",
+          status = "primary",
+          sliderInput(
+            "percentage",
+            label = h4("Select percentage"),
+            min = 0,
+            max = 100,
+            value = 10
+          )
+        ),
+        box(
+          title = "The minimum size of a subreddit",
+          status = "primary",
+          numericInput("minSubredditSize", label = h4("Select min size"), min = 1, value = 5)
+        )
+      ),
+      
       fluidRow(
         box(
           title = strings$timePeriodTitle,
@@ -230,20 +248,6 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "The percentage of the shared commenters between two subreddits",
-          status = "primary",
-          sliderInput(
-            "percentage",
-            label = h4("Select percentage"),
-            min = 0,
-            max = 100,
-            value = 50
-          )
-        )
-      ),
-      
-      fluidRow(  
-        box(
           title = "Upvotes",
           status = "primary",
           sliderInput(
@@ -253,7 +257,10 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
             max = 50, 
             value = c(-50, 50)
           )
-        ),
+        )
+      ),
+      
+      fluidRow(
         box(
           title = strings$goldTitle,
           status = "primary",
@@ -282,11 +289,11 @@ getSubredditRelationsPlotUI <- function() {
           width = 8,
           status = "primary", 
           solidHeader = TRUE,
-          plotOutput(
+          simpleNetworkOutput(
             "network", 
-            height = 250
-          )
+            height = 500)
         ),
+        
         box(
           title = "Settings",
           status = "primary",
@@ -295,8 +302,7 @@ getSubredditRelationsPlotUI <- function() {
           downloadButton(
             "downloadPlot", 
             label = "Save"
-          ),
-          textOutput("timer")
+          )
         )
       ),
       fluidRow(
