@@ -6,6 +6,7 @@ library(stringr)
 # bigger db
 tableName <- "rawdata1"
 
+# The "downs" field in the dataset is empty and the downvotes are presented by negative integers in "ups" field.
 scheme <- list(
   comment = "body",
   gold = "gilded",
@@ -77,6 +78,13 @@ commentAnalysis <- function(gilded = NULL, upsMin = NULL,
   return(query)
 }
 
+#subredditsRelations <- function(gilded = NULL, ups = NULL,
+#                                downs = NULL, upsOperator = NULL, 
+#                                downsOperator = NULL, timeFrom = NULL,
+#                                timeBefore = NULL, keywords = NULL,
+#                                subreddits = NULL, percentage = NULL,
+#                                minSub = NULL) {
+#
 subredditsRelations <- function(gilded = NULL, upsMin = NULL,
                                 upsMax = NULL, timeFrom = NULL,
                                 timeBefore = NULL, keywords = NULL,
@@ -93,16 +101,46 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   else if (!is.null(gilded) & gilded == 2) {
     base <- c(base, getValueEqual(scheme$gold, 1), " AND ")
   }
-  
+
   # Minimal upvotes condition
   if (!is.null(upsMin)) {
     base <- c(base, getValueMore(scheme$upVotes, upsMin), " AND ")
   }
-  
+
   # Maximum upvotes condition
   if (!is.null(upsMax)) {
     base <- c(base, getValueLess(scheme$upVotes, upsMax), " AND ")
   }
+  
+  #if (!is.null(ups)) {
+  #  # Equal upvotes condition
+  #  if (upsOperator == 1) {
+  #    base <- c(base, getValueEqual(scheme$upVotes, ups), " AND ")
+  #  }
+  #  # Maximum upvotes condition
+  #  else if (upsOperator == 2) {
+  #    base <- c(base, getValueLess(scheme$upVotes, ups), " AND ")
+  #  }
+  #  # Minimal upvotes condition
+  #  else if (upsOperator == 3) {
+  #    base <- c(base, getValueMore(scheme$upVotes, ups), " AND ")
+  #  }
+  #}
+
+  #if (!is.null(downs)) {
+  #  # Equal downsvotes condition
+  #  if (downsOperator == 1) {
+  #    base <- c(base, getValueEqual(scheme$upVotes, -downs), " AND ")
+  #  }
+  #  # Maximum downsvotes condition
+  #  else if (downsOperator == 2) {
+  #    base <- c(base, getValueMore(scheme$upVotes, -downs), " AND ")
+  #  }
+  #  # Minimal downsvotes condition
+  #  else if (downsOperator == 3) {
+  #    base <- c(base, getValueLess(scheme$upVotes, -downs), " AND ")
+  #  }
+  #}
   
   # Starting time condition
   if (!is.null(timeFrom)) {
@@ -120,7 +158,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   }
   
   # Removing [deleted] authors
-  base <- c(base, getValueNotEqual(scheme$author, "'[deleted]'"), " AND ")
+  #base <- c(base, getValueNotEqual(scheme$author, "'[deleted]'"), " AND ")
   
   # Keywords condition
   if (!is.null(keywords)) {

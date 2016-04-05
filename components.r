@@ -84,20 +84,24 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
       ),
       
       fluidRow(
-        tabBox(
-          title = "Votes",
+        #tabBox(
+        #  title = "Votes",
+        #  status = "primary",
+        #  tabPanel(
+        #    "Ups",
+        #    numericInput("maxUps", label = h4("Max"), value = NULL),
+        #    numericInput("minUps", label = h4("Min"), value = NULL)
+        #  ),
+        #  tabPanel(
+        #    "Downs",
+        #    numericInput("maxDowns", label = h4("Max"), value = NULL),
+        #    numericInput("minDowns", label = h4("Min"), value = NULL)
+        #  )
+        box(
+          title = "Upvotes range",
           status = "primary",
-          tabPanel(
-            "Ups",
-            numericInput("maxUps", label = h4("Max"), value = NULL),
-            numericInput("minUps", label = h4("Min"), value = NULL)
-          ),
-          tabPanel(
-            "Downs",
-            numericInput("maxDowns", label = h4("Max"), value = NULL),
-            numericInput("minDowns", label = h4("Min"), value = NULL)
-          )
-          
+          radioButtons("enableRange", label = NULL, choices = list("All comments" = 0, " Select range:" = 1)),
+          uiOutput("upvotesUI")
         ),
         box(
           title = strings$goldTitle,
@@ -112,18 +116,17 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
             ), 
             selected = 1
           )
-        ),
-        box(
-          title = "Upvotes",
-          status = "primary",
-          sliderInput(
-            "ups", 
-            label = h4("Select a range of upvotes"), 
-            min = -50, 
-            max = 50, 
-            value = c(-50, 50)
-          )
         )
+        #box(
+        #  title = "Upvotes",
+        #  status = "primary",
+        #  sliderInput(
+        #    "ups", 
+        #    label = h4("Select a range of upvotes"), 
+        #    min = -50, 
+        #    max = 50, 
+        #    value = c(-50, 50)
+        #  )
       ),
       fluidRow(
         column(width = 4),
@@ -232,6 +235,26 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           status = "primary",
           numericInput("minSubredditSize", label = h4("Select min size"), min = 1, value = 5)
         )
+        
+        #is it better if we combine relations spesific settings to one box with two tabs?
+        #tabBox(
+        #  title = "Subreddit settings",
+        #  tabPanel(
+        #    "Percentage",
+        #    sliderInput(
+        #      "Percentage",
+        #      label = h4("Select percentage"),
+        #      min = 0,
+        #      max = 100,
+        #      value = 10
+        #    )
+        #    
+        #  ),
+        #  tabPanel(
+        #    "Min size",
+        #    numericInput("minSubredditSize", label = h4("Min size"), min = 1, value = 5)
+        #  )
+        #)
       ),
       
       fluidRow(
@@ -283,16 +306,33 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "Upvotes",
+          title = "Upvotes range",
           status = "primary",
-          sliderInput(
-            "ups", 
-            label = h4("Select a range of upvotes"), 
-            min = -50, 
-            max = 50, 
-            value = c(-50, 50)
+          radioButtons("enableRange", label = NULL, choices = list("All comments" = 0, " Select range:" = 1)),
+          uiOutput("upvotesUI")
           )
-        )
+        #tabBox(
+        #  title = "Votes",
+        #  status = "primary",
+        #  tabPanel(
+        #    "Ups",
+        #    radioButtons(
+        #      "upsCompareButton", 
+        #      label = NULL,
+        #      choices = list("Exact" = 1, "More" = 2, "Less" = 3),
+        #      selected = 1),
+        #    numericInput("ups", label = h4("Ups"), value = NULL)
+        #  ),
+        #  tabPanel(
+        #    "Downs",
+        #    radioButtons(
+        #      "downsCompareButton",
+        #      label = NULL,
+        #      choices = list("Exact" = 1, "More" = 2, "Less" = 3),
+        #      selected = 1),
+        #    numericInput("downs", label = h4("Downs"), value = NULL)
+        #  )
+        #)
       ),
       
       fluidRow(
@@ -436,15 +476,10 @@ getFrequencyComponents <- function(startTime, endTime) {
           )
         ),
         box(
-          title = "Upvotes",
+          title = "Upvotes range",
           status = "primary",
-          sliderInput(
-            "ups", 
-            label = h4("Select a range of upvotes"), 
-            min = -50, 
-            max = 50, 
-            value = c(-50, 50)
-          )
+          radioButtons("enableRange", label = NULL, choices = list("All comments" = 0, " Select range:" = 1)),
+          uiOutput("upvotesUI")
         )
       ),
       fluidRow(
@@ -538,10 +573,20 @@ getFrequencyPlotUI <- function() {
   )
 }
 
+
 getDefaultPlotUI <- function() {
   return(
     tagList(
       h4("There is nothing, because you haven't chosen a pattern.")
     )
+  )
+}
+
+getUpvotesUI <- function() {
+  return(
+      tagList(
+        column(6,numericInput("upsMin", label = h5("Min"), value = -50)),
+        column(6,numericInput("upsMax", label = h5("Max"), value = 50)) 
+      )
   )
 }

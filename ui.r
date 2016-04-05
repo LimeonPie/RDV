@@ -29,6 +29,7 @@ ui <- dashboardPage(
         icon = icon("stats", lib = "glyphicon")
       )
     )
+    
   ),
 
   dashboardBody(

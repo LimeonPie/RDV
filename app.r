@@ -130,14 +130,23 @@ server <- function(input, output, session) {
       }
     )
   })
+
+  output$upvotesUI <- renderUI({
+  	switch(input$enableRange,
+  		"1" = {
+  		  getUpvotesUI()
+  		}
+  	  )
+  	})
   
+  #menu-tab is changed to "plot" when plotButton in configurations page is clicked 
   observeEvent(input$plotButton, {
-    #menu-tab is changed to "plot" when plotButton in configurations page is clicked 
+    if (input$patternSelect != "0") processConfiguration()
     updateTabItems(session, "menu", "plot")
   })
   
-  observeEvent(input$backButton, {
-    #menu-tab is changed to "configurations" when backButton in plot page is clicked 
+  #menu-tab is changed to "configurations" when backButton in plot page is clicked
+  observeEvent(input$backButton, { 
     updateTabItems(session, "menu", "conf")
   })
   
@@ -152,7 +161,7 @@ server <- function(input, output, session) {
       },
       "plot" = {
         print("Plot tab opened")
-        if (input$patternSelect != "0") processConfiguration()
+        #if (input$patternSelect != "0") processConfiguration()
       },
       {
         print("Unknown tab opened")
@@ -192,8 +201,14 @@ server <- function(input, output, session) {
         keywords <- input$keywordsInput
         authors <- input$authorsInput
         subreddits <- input$subredditsInput
-        upVotesMin <- input$ups[1]
-        upVotesMax <- input$ups[2]
+        # The range of votes is taken only when the "Select range:" - option is selected
+        if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
+          upVotesMin <- input$upsMin
+          upVotesMax <- input$upsMax
+        } else {
+          upVotesMin <- NULL
+          upVotesMax <- NULL
+        }
         # Making query
         query <- commentAnalysis(
           gilded = as.numeric(gilded),
@@ -274,7 +289,13 @@ server <- function(input, output, session) {
         }
         
         output$graph <- renderPlot({
-          makePlot()
+          # data frame needs to have content to be plotted
+          validate(
+              need(nrow(data)!= 0, "The query is empty so a plot is not drawn.")
+            )
+          if (nrow(data)!= 0){
+          	makePlot()
+          }
         })
       },
       "2" = {
@@ -286,12 +307,32 @@ server <- function(input, output, session) {
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         subreddits <- input$subredditsInput
-        upVotesMin <- input$ups[1]
-        upVotesMax <- input$ups[2]
+        if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
+          upVotesMin <- input$upsMin
+          upVotesMax <- input$upsMax
+        } else {
+          upVotesMin <- NULL
+          upVotesMax <- NULL
+        }
         relation <- input$percentage
-        minSubreddit <- input$minSubredditSize
+        if(is.numeric(input$upsMin)){
+          minSubreddit <- input$minSubredditSize
+        } else {
+          minSubreddit = 5
+          print("Minimum subreddit size has to be a number!")
+        }
+
+        #gilded <- input$isGilded
+        #keywords <- input$keywordsInput
+        #subreddits <- input$subredditsInput
+        #upVotes <- input$ups
+        #upsOperator<- input$upsCompareButton
+        #downVotes <- input$downs
+        #downsOperator<- input$downsCompareButton
+        #relation <- input$percentage
+        #minSubreddit <- input$minSubredditSize
         
-        #Making a query
+        ##Making a query
         query <- subredditsRelations(
           gilded = as.numeric(gilded),
           upsMin = upVotesMin,
@@ -303,6 +344,21 @@ server <- function(input, output, session) {
           percentage = relation,
           minSub = minSubreddit
         )
+        
+        #Making a query
+        #query <- subredditsRelations(
+        #  gilded = as.numeric(gilded),
+        #  ups = upVotes,
+        #  downs = downVotes,
+        #  upsOperator = upsOperator,
+        #  downsOperator = downsOperator,
+        #  timeFrom = periodStartPOSIX,
+        #  timeBefore = periodEndPOSIX,
+        #  subreddits = subreddits,
+        #  keywords = keywords,
+        #  percentage = relation,
+        #  minSub = minSubreddit
+        #)
 
         res <- dbSendQuery(con, query)
         data <- data.frame()
@@ -355,12 +411,14 @@ server <- function(input, output, session) {
           makePlot()
         }
         
-        #plotting, if there is no data text is written
+        #plotting, if there is no data, text is written
           output$network <- renderSimpleNetwork({
             validate(
               need(nrow(networkData)!= 0, "The query is empty so a plot is not drawn.")
             )
-            makePlot()
+            if (nrow(networkData)!= 0){
+              makePlot()
+            }
           })
           
       },
@@ -370,8 +428,14 @@ server <- function(input, output, session) {
         # Taking input parametres
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
-        upVotesMin <- input$ups[1]
-        upVotesMax <- input$ups[2]
+        # The range of votes is taken only when the "Select range:" - option is selected
+        if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
+          upVotesMin <- input$upsMin
+          upVotesMax <- input$upsMax
+        } else {
+          upVotesMin <- NULL
+          upVotesMax <- NULL
+        }
         # Making a query
         query <- frequencyOfWords(
           gilded = as.numeric(gilded),
@@ -425,7 +489,12 @@ server <- function(input, output, session) {
         }
         
         output$graph <- renderPlot({
-          makePlot()
+          validate(
+              need(nrow(data)!= 0, "The query is empty so a plot is not drawn.")
+            )
+          if (nrow(data)!= 0){
+          	makePlot()
+          }
         }, res = 110)
         
       },
