@@ -39,7 +39,8 @@ ui <- dashboardPage(
       tabItem(
         tabName = "default",
         h2("Hello World"),
-        p("The purpose of the project is to provide interesting and useful information about Reddit by visualising the given dataset. We do that by creating user-friendly web interface for making queries, and to present them in the form of multiple charts. So the main focus of the project is giving user the tools to make her/his own search to the database and present that information. Furthermore, we will pre-generate some charts that either have considerable run-time or have particularly interesting information to show.")
+        div(p("The purpose of this project is to visualise Reddit comments. Select configure, choose one of the three main patterns, and plot the data!"), style="font-size: 18px")
+        #div(p("The purpose of the project is to provide interesting and useful information about Reddit by visualising the given dataset. We do that by creating user-friendly web interface for making queries, and to present them in the form of multiple charts. So the main focus of the project is giving user the tools to make her/his own search to the database and present that information. Furthermore, we will pre-generate some charts that either have considerable run-time or have particularly interesting information to show."), style="font-size: 18px")
       ),
 
       # Conf tab content
@@ -47,23 +48,26 @@ ui <- dashboardPage(
         tabName = "conf",
         fluidRow(
           box(
-            title = "Pattern",
-            status = "primary",
-            selectInput(
-              'patternSelect',
-              label = h4("Select pattern"),
-              choices = list(
-                "- Select pattern -" = 0,
-                "Amount of comments" = 1, 
-                "Subreddit relations" = 2,
-                "Frequency of words" = 3
+            width = 6,
+              title = "Pattern",
+              status = "primary",
+              selectInput(
+                'patternSelect',
+                label = h4("Select pattern"),
+                choices = list(
+                  "- Select pattern -" = 0,
+                  "Amount of comments" = 1, 
+                  "Subreddit relations" = 2,
+                  "Frequency of words" = 3
+                ),
+                selected = 0
               ),
-              selected = 0
-            )
+              textOutput("patternDescription")
           ),
-          box(
-            title = "Description",
-            textOutput("patternDescription")
+          column(
+            width = 6,
+            div(uiOutput("patternImage"), style="text-align: center"),
+            br()
           )
         ),
         uiOutput("inputComponents")

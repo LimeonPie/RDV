@@ -84,19 +84,6 @@ getCommentAnalysisComponents <- function(startTime, endTime) {
       ),
       
       fluidRow(
-        #tabBox(
-        #  title = "Votes",
-        #  status = "primary",
-        #  tabPanel(
-        #    "Ups",
-        #    numericInput("maxUps", label = h4("Max"), value = NULL),
-        #    numericInput("minUps", label = h4("Min"), value = NULL)
-        #  ),
-        #  tabPanel(
-        #    "Downs",
-        #    numericInput("maxDowns", label = h4("Max"), value = NULL),
-        #    numericInput("minDowns", label = h4("Min"), value = NULL)
-        #  )
         box(
           title = "Upvotes range",
           status = "primary",
@@ -311,28 +298,6 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
           radioButtons("enableRange", label = NULL, choices = list("All comments" = 0, " Select range:" = 1)),
           uiOutput("upvotesUI")
           )
-        #tabBox(
-        #  title = "Votes",
-        #  status = "primary",
-        #  tabPanel(
-        #    "Ups",
-        #    radioButtons(
-        #      "upsCompareButton", 
-        #      label = NULL,
-        #      choices = list("Exact" = 1, "More" = 2, "Less" = 3),
-        #      selected = 1),
-        #    numericInput("ups", label = h4("Ups"), value = NULL)
-        #  ),
-        #  tabPanel(
-        #    "Downs",
-        #    radioButtons(
-        #      "downsCompareButton",
-        #      label = NULL,
-        #      choices = list("Exact" = 1, "More" = 2, "Less" = 3),
-        #      selected = 1),
-        #    numericInput("downs", label = h4("Downs"), value = NULL)
-        #  )
-        #)
       ),
       
       fluidRow(

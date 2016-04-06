@@ -64,8 +64,16 @@ server <- function(input, output, session) {
       "2" = "Subreddit relations pattern draws a node chart about how subreddits are connected. For example, if there are at least 50% shared commenters, an edge is plotted. The amount of shared commenters is compared to the mean of the two subreddits. The percentage of shared commenters can be adjusted below.",
       "3" = "Frequency of words pattern draws a word cloud of the most used words within chosen subreddits.",
       "Please select the desired type of data processing and define input parametres.
-      The description of patter will appear here."
+      The description of pattern will appear here."
     )
+  })
+  
+  output$patternImage <- renderUI({
+    # selecting the image, they now straight up scale without any pixel limits
+    switch(input$patternSelect,
+           "1" = img(src="comments_1.PNG", height = "100%", width = "100%"),
+           "2" = img(src="relations_1.PNG", height = "90%", width = "90%"),
+           "3" = img(src="wordcloud_1.PNG", height = "70%", width = "70%"))
   })
   
   observeEvent(input$patternSelect, {
