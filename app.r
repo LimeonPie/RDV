@@ -26,14 +26,14 @@ server <- function(input, output, session) {
   
   # Insert your user and password
   con <- dbConnect(
-    MySQL(),
+    RMySQL::MySQL(),
     user="acp",
     password="acpdev16",
     dbname="acp_dev",
     host="46.101.153.165",
     port=3306
   )
-  
+  print(con)
   # Getting start time of dataset
   minTimeQuery <- getMinValue(scheme$createTime)
   rs <- dbSendQuery(con, minTimeQuery)
@@ -209,6 +209,15 @@ server <- function(input, output, session) {
         keywords <- input$keywordsInput
         authors <- input$authorsInput
         subreddits <- input$subredditsInput
+        if(!is.null(input$keywordsInput)){
+          keywords <- dbEscapeStrings(con, input$keywordsInput)
+        }
+        if(!is.null(input$subredditsInput)){
+          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+        }
+        if(!is.null(input$authorsInput)){
+          authors <- dbEscapeStrings(con, input$authorsInput)
+        }
         # The range of votes is taken only when the "Select range:" - option is selected
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
           upVotesMin <- input$upsMin
@@ -311,10 +320,12 @@ server <- function(input, output, session) {
         # using atm D3Network to plot 
         print("Starting subreddits relations analysis")
         
-        # Taking input parameters
+        # Taking input parameters and escaping SQL spesific characters like " when needed
         gilded <- input$isGilded
-        keywords <- input$keywordsInput
         subreddits <- input$subredditsInput
+        if(!is.null(input$subredditsInput)){
+          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+        }
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
           upVotesMin <- input$upsMin
           upVotesMax <- input$upsMax
@@ -322,23 +333,13 @@ server <- function(input, output, session) {
           upVotesMin <- NULL
           upVotesMax <- NULL
         }
-        relation <- input$percentage
+        percentage <- input$percentage
         if(is.numeric(input$upsMin)){
           minSubreddit <- input$minSubredditSize
         } else {
           minSubreddit = 5
           print("Minimum subreddit size has to be a number!")
         }
-
-        #gilded <- input$isGilded
-        #keywords <- input$keywordsInput
-        #subreddits <- input$subredditsInput
-        #upVotes <- input$ups
-        #upsOperator<- input$upsCompareButton
-        #downVotes <- input$downs
-        #downsOperator<- input$downsCompareButton
-        #relation <- input$percentage
-        #minSubreddit <- input$minSubredditSize
         
         ##Making a query
         query <- subredditsRelations(
@@ -348,25 +349,9 @@ server <- function(input, output, session) {
           timeFrom = periodStartPOSIX,
           timeBefore = periodEndPOSIX,
           subreddits = subreddits,
-          keywords = keywords,
-          percentage = relation,
+          percentage = percentage,
           minSub = minSubreddit
         )
-        
-        #Making a query
-        #query <- subredditsRelations(
-        #  gilded = as.numeric(gilded),
-        #  ups = upVotes,
-        #  downs = downVotes,
-        #  upsOperator = upsOperator,
-        #  downsOperator = downsOperator,
-        #  timeFrom = periodStartPOSIX,
-        #  timeBefore = periodEndPOSIX,
-        #  subreddits = subreddits,
-        #  keywords = keywords,
-        #  percentage = relation,
-        #  minSub = minSubreddit
-        #)
 
         res <- dbSendQuery(con, query)
         data <- data.frame()
@@ -436,6 +421,9 @@ server <- function(input, output, session) {
         # Taking input parametres
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
+        if(!is.null(input$input$subredditsInput)){
+          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+        }
         # The range of votes is taken only when the "Select range:" - option is selected
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
           upVotesMin <- input$upsMin
