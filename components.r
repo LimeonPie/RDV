@@ -162,11 +162,9 @@ getCommentAnalysisPlotUI <- function() {
             value = FALSE
           ),
           br(),
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           )
         )
       ),
@@ -278,29 +276,11 @@ getSubredditRelationsComponents <- function(startTime, endTime) {
       
       fluidRow(
         box(
-          title = strings$keywordsTitle,
-          status = "primary",
-          selectizeInput(
-            'keywordsInput',
-            label = h4(strings$keywordsDesc),
-            choices ="",
-            multiple = TRUE,
-            options = list(
-              create = TRUE, 
-              maxItems = 10000, 
-              placeholder = 'Keywords'
-            )
-          )
-        ),
-        box(
           title = "Upvotes range",
           status = "primary",
           radioButtons("enableRange", label = NULL, choices = list("All comments" = 0, " Select range:" = 1)),
           uiOutput("upvotesUI")
-          )
-      ),
-      
-      fluidRow(
+          ),
         box(
           title = strings$goldTitle,
           status = "primary",
@@ -350,11 +330,9 @@ getSubredditRelationsPlotUI <- function() {
           status = "primary",
           solidHeader = TRUE,
           width = 4,
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           )
         )
       ),
@@ -496,12 +474,16 @@ getFrequencyPlotUI <- function() {
             value = 50
           ),
           br(),
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           ),
+          #bsButton(
+          #  "downloadPlot", 
+          #  label = "Save",
+          #  icon = icon("floppy-save", lib = "glyphicon"),
+          #  size = "large"
+          #),
           textOutput("timer")
         )
       ),
