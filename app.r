@@ -6,6 +6,7 @@ library(wordcloud)
 library(networkD3)
 library(igraph)
 library(shinyBS)
+library(magrittr)
 
 source('./ui.r')
 source('./dbQuery.r')
@@ -204,7 +205,7 @@ server <- function(input, output, session) {
       "1" = {
         # Comment analysis
         print("Starting comment analysis")
-        # Taking input parameters
+        # Taking input parameters and escaping SQL spesific characters like " when needed
         gilded <- input$isGilded
         keywords <- input$keywordsInput
         authors <- input$authorsInput
@@ -395,11 +396,13 @@ server <- function(input, output, session) {
         makePlot <- function(){
           simpleNetwork(
             networkData, 
-            fontSize = 20
+            fontSize = 20,
+            zoom = TRUE
           )
         }
         
         savePlot <- function(file) {
+          simpleNetwork(networkData, zoom = TRUE) %>%
           saveNetwork(file)
           makePlot()
         }
@@ -418,7 +421,7 @@ server <- function(input, output, session) {
       "3" = {
         # Frequency of words
         print("Starting frequence of words")
-        # Taking input parametres
+        # Taking input parameters and escaping SQL spesific characters like " when needed
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
         if(!is.null(input$input$subredditsInput)){
@@ -518,7 +521,6 @@ server <- function(input, output, session) {
         },
         content = function(file) {
           savePlot(file)
-          dev.off()
         }
       )
     }

@@ -162,11 +162,9 @@ getCommentAnalysisPlotUI <- function() {
             value = FALSE
           ),
           br(),
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           )
         )
       ),
@@ -332,11 +330,9 @@ getSubredditRelationsPlotUI <- function() {
           status = "primary",
           solidHeader = TRUE,
           width = 4,
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           )
         )
       ),
@@ -478,12 +474,16 @@ getFrequencyPlotUI <- function() {
             value = 50
           ),
           br(),
-          bsButton(
+          downloadButton(
             "downloadPlot", 
-            label = "Save",
-            icon = icon("floppy-save", lib = "glyphicon"),
-            size = "large"
+            label = "Save"
           ),
+          #bsButton(
+          #  "downloadPlot", 
+          #  label = "Save",
+          #  icon = icon("floppy-save", lib = "glyphicon"),
+          #  size = "large"
+          #),
           textOutput("timer")
         )
       ),
