@@ -301,9 +301,8 @@ server <- function(input, output, session) {
         }
         
         savePlot <- function(file) {
-          ggsave(file, device = 'png', width = 7, height = 7)
-          p <- makePlot()
-          print(p)
+          png(file)
+          print(makePlot())
         }
         
         output$graph <- renderPlot({
