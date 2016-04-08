@@ -8,7 +8,7 @@ customStopwords <- c(
   "dont", "doesnt", "ive", "ill", "iam", "arent",
   "shouldnt", "havent", "didnt", "hasnt", "hadnt",
   "like", "think", "really", "deleted", "youre",
-  "isnt", "theyre", "wouldnt", "hes", "shes"
+  "isnt", "theyre", "wouldnt", "hes", "shes", "wont"
 )
 
 convertTime <- function(data) {
