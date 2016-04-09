@@ -5,7 +5,9 @@ library(ggplot2)
 library(wordcloud)
 library(networkD3)
 library(igraph)
+#used to create buttons
 library(shinyBS)
+#used to save the relations plot
 library(magrittr)
 
 source('./ui.r')
@@ -334,7 +336,7 @@ server <- function(input, output, session) {
           upVotesMax <- NULL
         }
         percentage <- input$percentage
-        if(is.numeric(input$upsMin)){
+        if(is.numeric(input$minSubredditSize)){
           minSubreddit <- input$minSubredditSize
         } else {
           minSubreddit = 5

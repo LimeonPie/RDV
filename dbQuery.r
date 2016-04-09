@@ -78,13 +78,6 @@ commentAnalysis <- function(gilded = NULL, upsMin = NULL,
   return(query)
 }
 
-#subredditsRelations <- function(gilded = NULL, ups = NULL,
-#                                downs = NULL, upsOperator = NULL, 
-#                                downsOperator = NULL, timeFrom = NULL,
-#                                timeBefore = NULL, keywords = NULL,
-#                                subreddits = NULL, percentage = NULL,
-#                                minSub = NULL) {
-#
 subredditsRelations <- function(gilded = NULL, upsMin = NULL,
                                 upsMax = NULL, timeFrom = NULL,
                                 timeBefore = NULL, subreddits = NULL, 

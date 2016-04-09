@@ -9,3 +9,5 @@ install.packages("wordcloud", repos="http://cran.rstudio.com/")
 install.packages("networkD3", repos="http://cran.rstudio.com/")
 install.packages("igraph", repos="http://cran.rstudio.com/")
 install.packages("shinyBS", repos="http://cran.rstudio.com/")
+install.packages("magrittr", repos="http://cran.rstudio.com/")
+
