@@ -2,9 +2,13 @@
 ## Operations with data ##
 library(stringr)
 # small db
-#tableName <- "rawdata"
+tableName <- "rawdata"
 # bigger db
-tableName <- "rawdata1"
+#tableName <- "rawdata1"
+
+#MySQ/MariaDB queries
+database <- "PostgreSQL"
+#database <- "MySQL"
 
 # The "downs" field in the dataset is empty and the downvotes are presented by negative integers in "ups" field.
 scheme <- list(
@@ -104,15 +108,15 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
     base <- c(base, getValueLess(scheme$upVotes, upsMax), " AND ")
   }
   
-  # Starting time condition
-  if (!is.null(timeFrom)) {
-    base <- c(base, getValueMore(scheme$createTime, timeFrom), " AND ")
-  }
+  ## Starting time condition
+  #if (!is.null(timeFrom)) {
+  #  base <- c(base, getValueMore(scheme$createTime, timeFrom), " AND ")
+  #}
   
-  # Ending time condition
-  if (!is.null(timeBefore)) {
-    base <- c(base, getValueLess(scheme$createTime, timeBefore), " AND ")
-  }
+  ## Ending time condition
+  #if (!is.null(timeBefore)) {
+  #  base <- c(base, getValueLess(scheme$createTime, timeBefore), " AND ")
+  #}
   
   # Subreddits condition
   if (!is.null(subreddits)) {
@@ -126,6 +130,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   conditions <- paste(base, sep = "", collapse = "")
   print(conditions)
   
+if(database != "PostgreSQL"){
   query <- sprintf("SELECT final.subreddit_a, final.subreddit_b FROM (SELECT a.subreddit AS subreddit_a, a.authors AS authors_in_sub_a, b.subreddit AS subreddit_b, b.authors AS authors_in_sub_b, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS percent
  FROM
  (SELECT t1.author AS author, t1.subreddit AS subreddit, t2.authors AS authors
@@ -144,11 +149,74 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
  WHERE a.subreddit!=b.subreddit
  GROUP BY 1,3) AS final
  WHERE final.percent > %s;", tableName, conditions, tableName, conditions, minSub, tableName, conditions, tableName, conditions, minSub, percentage)
+} else {
+#  query <- sprintf("SELECT final.sub_a, final.sub_b 
+#FROM 
+#(SELECT a.subreddit AS sub_a, a.authors, b.subreddit AS sub_b, b.authors, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2))
+#AS percent FROM (
+#SELECT t1.author, t1.subreddit, t2.authors FROM 
+#(SELECT DISTINCT author, subreddit FROM %s WHERE %s author!='[deleted]') AS t1 
+#INNER JOIN 
+#(SELECT * FROM 
+#(SELECT subreddit, count(distinct author) AS authors FROM %s WHERE %s author!='[deleted]' GROUP BY subreddit) AS t5 WHERE authors >= %s) AS t2 
+#ON t1.subreddit=t2.subreddit GROUP BY t1.subreddit, t2.authors, t1.author) AS a 
+#INNER JOIN (
+#SELECT t3.author, t3.subreddit, t4.authors FROM (SELECT DISTINCT author, subreddit FROM %s WHERE %s author != '[deleted]') AS t3 
+#INNER JOIN (
+#SELECT * FROM (
+#SELECT subreddit, count(distinct author) AS authors FROM %s WHERE %s author!='[deleted]' GROUP BY subreddit) AS t6 WHERE authors >= %s) AS t4 
+#ON t3.subreddit=t4.subreddit GROUP BY t3.subreddit, t3.author, t4.authors ) AS b 
+#ON a.author=b.author 
+#WHERE a.subreddit!=b.subreddit 
+#GROUP BY a.subreddit, a.authors, b.subreddit, b.authors) AS final 
+#WHERE final.percent > %s;", tableName, conditions, tableName, conditions, minSub, tableName, conditions, tableName, conditions, minSub, percentage)
+  query <- sprintf("SELECT final.sub_a, final.sub_b 
+FROM 
+(SELECT a.subreddit AS sub_a, a.authors, b.subreddit AS sub_b, b.authors, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2))
+AS percent FROM (
+SELECT t1.author, t1.subreddit, t2.authors FROM 
+(SELECT DISTINCT author, subreddit FROM %s WHERE %s1=1) AS t1 
+INNER JOIN 
+(SELECT * FROM 
+(SELECT subreddit, count(distinct author) AS authors FROM %s WHERE %s 1=1 GROUP BY subreddit) AS t5 WHERE authors >= %s) AS t2 
+ON t1.subreddit=t2.subreddit GROUP BY t1.subreddit, t2.authors, t1.author) AS a 
+INNER JOIN (
+SELECT t3.author, t3.subreddit, t4.authors FROM (SELECT DISTINCT author, subreddit FROM %s WHERE %s 1=1) AS t3 
+INNER JOIN (
+SELECT * FROM (
+SELECT subreddit, count(distinct author) AS authors FROM %s WHERE %s 1=1 GROUP BY subreddit) AS t6 WHERE authors >= %s) AS t4 
+ON t3.subreddit=t4.subreddit GROUP BY t3.subreddit, t3.author, t4.authors ) AS b 
+ON a.author=b.author 
+WHERE a.subreddit!=b.subreddit 
+GROUP BY a.subreddit, a.authors, b.subreddit, b.authors) AS final 
+WHERE final.percent > %s;", tableName, conditions, tableName, conditions, minSub, tableName, conditions, tableName, conditions, minSub, percentage)
+}
  
+  
+query1 <- sprintf("SELECT final.sub_a, final.sub_b FROM 
+                  (SELECT a.subreddit AS sub_a, a.authors, b.subreddit AS sub_b, b.authors, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2))
+                  AS percent FROM (
+                    SELECT t1.author, t1.subreddit, t2.authors FROM 
+                    (SELECT DISTINCT author, subreddit FROM rawdata WHERE author!='[deleted]') AS t1 
+                    INNER JOIN 
+                    (SELECT * FROM 
+                    (SELECT subreddit, count(distinct author) AS authors FROM rawdata WHERE author!='[deleted]' GROUP BY subreddit) AS t5
+                    WHERE authors >= 5) AS t2 
+                    ON t1.subreddit=t2.subreddit GROUP BY t1.subreddit, t2.authors, t1.author) AS a 
+                  INNER JOIN (
+                    SELECT t3.author, t3.subreddit, t4.authors FROM (SELECT DISTINCT author, subreddit FROM rawdata WHERE author != '[deleted]') AS t3 
+                    INNER JOIN (
+                      SELECT * FROM (
+                        SELECT subreddit, count(distinct author) AS authors FROM rawdata WHERE author!='[deleted]' GROUP BY subreddit) AS t6 WHERE authors >= 5) AS t4 
+                    ON t3.subreddit=t4.subreddit GROUP BY t3.subreddit, t3.author, t4.authors ) AS b 
+                  ON a.author=b.author 
+                  WHERE a.subreddit!=b.subreddit 
+                  GROUP BY a.subreddit, a.authors, b.subreddit, b.authors) AS final 
+                  WHERE final.percent > 10;")
   #removes new lines from the query
   query <- gsub("[\r\n]", "", query)
-  print(query)
-  return(query)
+  print(query1)
+  return(query1)
 }
 
 frequencyOfWords <- function(gilded = NULL, upsMin = NULL,

@@ -1,10 +1,10 @@
 ## app.R ##
 library(shiny)
 library(RMySQL)
+library(RPostgreSQL)
 library(ggplot2)
 library(wordcloud)
 library(networkD3)
-library(igraph)
 #used to create buttons
 library(shinyBS)
 #used to save the relations plot
@@ -22,20 +22,47 @@ source('./components.r')
 # host="46.101.153.165"
 # port=3306
 
+# Insert your user, password and database
+#database <- "PostgreSQL"
+#database <- "MySQL"
+
 server <- function(input, output, session) {
   
   # The amount of data to process with each request
   chunkSize <- 500
   
-  # Insert your user and password
-  con <- dbConnect(
-    RMySQL::MySQL(),
-    user="acp",
-    password="acpdev16",
-    dbname="acp_dev",
-    host="46.101.153.165",
-    port=3306
-  )
+  if(database == "PostgreSQL"){
+    drv <- dbDriver("PostgreSQL")
+    #remove brackets to change connection
+    if(FALSE){
+      con <- dbConnect(
+        drv, 
+        host="reddit.cz9ypccni6rk.eu-west-1.redshift.amazonaws.com", 
+        port="5439",
+        dbname="reddit", 
+        user="readonly", 
+        password="sfgFSH_sghsgj52662")
+    } else {
+      con <- dbConnect(
+        drv, 
+        host="localhost", 
+        port="5432",
+        dbname="reddit_data", 
+        user="postgres", 
+        password="98469181")
+    }
+    
+  } else {
+    con <- dbConnect(
+      RMySQL::MySQL(),
+      user="acp",
+      password="acpdev16",
+      dbname="acp_dev",
+      host="46.101.153.165",
+      port=3306
+    )
+  }
+  
   print(con)
   # Getting start time of dataset
   minTimeQuery <- getMinValue(scheme$createTime)
