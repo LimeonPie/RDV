@@ -1,10 +1,10 @@
 ## dbQuery.r ##
 ## Operations with data ##
 library(stringr)
-# small db
-#tableName <- "rawdata"
-# bigger db
-tableName <- "rawdata1"
+# small test 1k rows and full db
+tableName <- "rawdata"
+# bigger test 10k rows
+#tableName <- "rawdata1"
 
 # The "downs" field in the dataset is empty and the downvotes are presented by negative integers in "ups" field.
 scheme <- list(
@@ -242,7 +242,8 @@ searchValue <- function(value, keywords) {
 }
 
 findUniqueValues <- function(field) {
-  base <- c("SELECT DISTINCT ", field, " FROM ", tableName, " ORDER BY ", field, ";")
+  #base <- c("SELECT DISTINCT ", field, " FROM ", tableName, " ORDER BY ", field, ";")
+  base <- c("SELECT DISTINCT ", field, " FROM ", tableName, ";")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }
@@ -258,14 +259,14 @@ findUniqueValuesWithinTime <- function(field, timeFrom, timeBefore) {
 
 getMinValue <- function(field) {
   base <- c("SELECT ", field, " FROM ", tableName)
-  base <- c(base, " WHERE ", field, "=(SELECT MIN(", field, ") FROM ", tableName, ");")
+  base <- c(base, " WHERE ", field, "=(SELECT MIN(", field, ") FROM ", tableName, ") LIMIT 1;")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }
 
 getMaxValue <- function(field) {
   base <- c("SELECT ", field, " FROM ", tableName)
-  base <- c(base, " WHERE ", field, "=(SELECT MAX(", field, ") FROM ", tableName, ");")
+  base <- c(base, " WHERE ", field, "=(SELECT MAX(", field, ") FROM ", tableName, ") LIMIT 1;")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }

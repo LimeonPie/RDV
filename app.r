@@ -1,6 +1,7 @@
 ## app.R ##
 library(shiny)
 library(RMySQL)
+library(RPostgreSQL)
 library(ggplot2)
 library(wordcloud)
 library(networkD3)
@@ -15,7 +16,7 @@ source('./dbQuery.r')
 source('./processing.r')
 source('./components.r')
 
-# Des server details
+# Dev server details
 # user="acp"
 # password="acpdev16"
 # dbname="acp_dev"
@@ -25,22 +26,31 @@ source('./components.r')
 server <- function(input, output, session) {
   
   # The amount of data to process with each request
-  chunkSize <- 500
+  chunkSize <- 10000
   
   # Insert your user and password
-  con <- dbConnect(
+  'con <- dbConnect(
     RMySQL::MySQL(),
     user="acp",
     password="acpdev16",
     dbname="acp_dev",
     host="46.101.153.165",
     port=3306
+  )'
+  con <- dbConnect(
+    dbDriver("PostgreSQL"), 
+    host="reddit.cz9ypccni6rk.eu-west-1.redshift.amazonaws.com", 
+    port="5439",
+    dbname="reddit", 
+    user="readonly", 
+    password="sfgFSH_sghsgj52662"
   )
-  print(con)
   # Getting start time of dataset
   minTimeQuery <- getMinValue(scheme$createTime)
   rs <- dbSendQuery(con, minTimeQuery)
   minTime <- fetch(rs, n=-1)
+  print("Min time")
+  print(minTime$created_utc[1])
   startTime <- convertTime(minTime)
   dbClearResult(rs)
   
@@ -48,18 +58,19 @@ server <- function(input, output, session) {
   maxTimeQuery <- getMaxValue(scheme$createTime)
   rs <- dbSendQuery(con, maxTimeQuery)
   maxTime <- fetch(rs, n=-1)
+  print("Max time")
+  print(maxTime$created_utc[1])
   endTime <- convertTime(maxTime)
   dbClearResult(rs)
   
   # Fetching all subreddits in this dataset
-  subredditsQuery <- findUniqueValuesWithinTime(
-    field = scheme$subreddit,
-    timeFrom = minTime,
-    timeBefore = maxTime
-  )
-  rs <- dbSendQuery(con, subredditsQuery)
-  datasetSubreddits <- fetch(rs, n=-1)
-  dbClearResult(rs)
+  #subredditsQuery <- findUniqueValues(
+    #field = scheme$subreddit
+  #)
+  #rs <- dbSendQuery(con, subredditsQuery)
+  #datasetSubreddits <- fetch(rs, n=-1)
+  #print(datasetSubreddits)
+  #dbClearResult(rs)
   
   output$patternDescription <- renderText({
     switch(input$patternSelect,
@@ -82,7 +93,7 @@ server <- function(input, output, session) {
   observeEvent(input$patternSelect, {
     # Filtering unique subreddits
     # and updating the subreddits input
-    updateSelectizeInput(session, "subredditsInput", choices = datasetSubreddits$subreddit)
+    #updateSelectizeInput(session, "subredditsInput", choices = datasetSubreddits$subreddit)
   })
   
   output$inputComponents <- renderUI(
