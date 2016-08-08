@@ -49,8 +49,6 @@ server <- function(input, output, session) {
   minTimeQuery <- getMinValue(scheme$createTime)
   rs <- dbSendQuery(con, minTimeQuery)
   minTime <- fetch(rs, n=-1)
-  print("Min time")
-  print(minTime$created_utc[1])
   startTime <- convertTime(minTime)
   dbClearResult(rs)
   
@@ -58,8 +56,6 @@ server <- function(input, output, session) {
   maxTimeQuery <- getMaxValue(scheme$createTime)
   rs <- dbSendQuery(con, maxTimeQuery)
   maxTime <- fetch(rs, n=-1)
-  print("Max time")
-  print(maxTime$created_utc[1])
   endTime <- convertTime(maxTime)
   dbClearResult(rs)
   
@@ -200,11 +196,9 @@ server <- function(input, output, session) {
     # If user put times out of range
     if (periodStart < startTime$time || periodStart > endTime$time) {
       periodStart <- startTime$time
-      print("Start date out of range, fixing")
     }
     if (periodEnd < startTime$time || periodEnd > endTime$time) {
       periodEnd <- endTime$time
-      print("End date out of range, fixing")
     }
     periodStartPOSIX <- as.numeric(as.POSIXct(periodStart, origin="1970-01-01", tz = "GMT"))
     periodEndPOSIX <- as.numeric(as.POSIXct(periodEnd, origin="1970-01-01", tz = "GMT"))
@@ -224,13 +218,16 @@ server <- function(input, output, session) {
         authors <- input$authorsInput
         subreddits <- input$subredditsInput
         if(!is.null(input$keywordsInput)){
-          keywords <- dbEscapeStrings(con, input$keywordsInput)
+          #keywords <- dbEscapeStrings(con, input$keywordsInput)
+          keywords <- input$keywordsInput
         }
         if(!is.null(input$subredditsInput)){
-          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          #subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          subreddits <- input$subredditsInput
         }
         if(!is.null(input$authorsInput)){
-          authors <- dbEscapeStrings(con, input$authorsInput)
+          #authors <- dbEscapeStrings(con, input$authorsInput)
+          authors <- input$authorsInput
         }
         # The range of votes is taken only when the "Select range:" - option is selected
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
@@ -337,7 +334,8 @@ server <- function(input, output, session) {
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
         if(!is.null(input$subredditsInput)){
-          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          #subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          subreddits <- input$subredditsInput
         }
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
           upVotesMin <- input$upsMin
@@ -437,7 +435,8 @@ server <- function(input, output, session) {
         gilded <- input$isGilded
         subreddits <- input$subredditsInput
         if(!is.null(input$input$subredditsInput)){
-          subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          #subreddits <- dbEscapeStrings(con, input$subredditsInput)
+          subreddits <- input$subredditsInput
         }
         # The range of votes is taken only when the "Select range:" - option is selected
         if(input$enableRange == 1 && is.numeric(input$upsMin) && is.numeric(input$upsMax)){
