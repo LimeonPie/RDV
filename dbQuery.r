@@ -126,8 +126,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   conditions <- paste(base, sep = "", collapse = "")
   print(conditions)
   
-  query <- sprintf("SELECT final.subreddit_a, final.subreddit_b FROM (SELECT a.subreddit AS subreddit_a, a.authors AS authors_in_sub_a, b.subreddit AS subreddit_b, b.authors AS authors_in_sub_b, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS percent
- FROM
+  query <- sprintf("SELECT final.subreddit_a, final.subreddit_b FROM (SELECT a.subreddit AS subreddit_a, a.authors AS authors_in_sub_a, b.subreddit AS subreddit_b, b.authors AS authors_in_sub_b, FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS final.percent FROM
  (SELECT t1.author AS author, t1.subreddit AS subreddit, t2.authors AS authors
  FROM (SELECT DISTINCT author, subreddit FROM %s WHERE %s author!='[deleted]') AS t1
  JOIN (SELECT * FROM (SELECT subreddit, count(distinct author) AS authors FROM %s WHERE %s author!='[deleted]' GROUP BY subreddit) AS t5 WHERE authors >= %s) AS t2
@@ -233,10 +232,11 @@ getValueIn <- function(value, list) {
 searchValue <- function(value, keywords) {
   # Search among keywords:
   # 1 option: WHERE body REGEXP 'key1|key2|key3'
-  # 2 option WHERE body LIKE '%key1%' OR body LIKE '%key2%'...
+  # 2 option: WHERE body LIKE '%key1%' OR body LIKE '%key2%'...
+  # 3 option: SELECT 'abc' SIMILAR TO 'abc';
   # TODO: Find what better
   keys <- paste(keywords, collapse = "|")
-  base <- c(value, " REGEXP '", keys, "'")
+  base <- c(value, " SIMILAR TO '(", keys, ")'")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }
