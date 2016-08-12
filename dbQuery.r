@@ -129,14 +129,12 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   query <- sprintf("
     SELECT final.subreddit_a, final.subreddit_b 
     FROM 
-      (SELECT a.subreddit AS subreddit_a, 
-              a.authors AS authors_in_sub_a, 
-              b.subreddit AS subreddit_b, 
-              b.authors AS authors_in_sub_b, 
+      (SELECT a.subreddit_a, 
+              b.subreddit_b, 
               floor(100 * (count(*)/((a.authors + b.authors)/2))) AS percentage 
       FROM
         (SELECT t1.author AS author, 
-                t1.subreddit AS subreddit, 
+                t1.subreddit AS subreddit_a, 
                 t2.authors AS authors
         FROM 
           (SELECT DISTINCT author, subreddit 
@@ -150,10 +148,10 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
               WHERE %s author!='[deleted]' GROUP BY subreddit) AS t5 
               WHERE authors >= %s) AS t2
           ON t1.subreddit=t2.subreddit
-          GROUP BY subreddit, author) AS a
+          GROUP BY subreddit_a, author, authors) AS a
         JOIN 
           (SELECT t3.author AS author, 
-                  t3.subreddit AS subreddit, 
+                  t3.subreddit AS subreddit_b, 
                   t4.authors AS authors
           FROM 
             (SELECT DISTINCT author, subreddit 
@@ -167,9 +165,9 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
                 WHERE %s author!='[deleted]' GROUP BY subreddit) AS t6 
               WHERE authors >= %s) AS t4
             ON t3.subreddit=t4.subreddit
-            GROUP BY subreddit, author) AS b
+            GROUP BY subreddit_b, author, authors) AS b
           ON a.author=b.author
-        WHERE a.subreddit!=b.subreddit GROUP BY 1,3) AS final
+        WHERE a.subreddit_a!=b.subreddit_b GROUP BY 1,3) AS final
       WHERE final.percentage > %s;", 
   tableName, conditions, tableName, 
   conditions, minSub, tableName, 
@@ -268,7 +266,7 @@ searchValue <- function(value, keywords) {
   # 3 option: SELECT 'abc' SIMILAR TO 'abc';
   # TODO: Find what better
   keys <- paste(keywords, collapse = "|")
-  base <- c(value, " SIMILAR TO '(", keys, ")'")
+  base <- c(value, " SIMILAR TO '%(", keys, ")%'")
   query <- paste(base, sep = "", collapse = "")
   return(query)
 }
