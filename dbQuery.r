@@ -186,7 +186,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
                         a.authors, 
                         b.subreddit AS sub_b, 
                         b.authors, 
-                        FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS percent 
+                        FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS percentage 
                       FROM 
                         (SELECT 
                           t1.author, 
@@ -236,7 +236,7 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
                       ON a.author=b.author 
                       WHERE a.subreddit!=b.subreddit 
                       GROUP BY a.subreddit, a.authors, b.subreddit, b.authors) AS final 
-                     WHERE final.percent > %s;", 
+                     WHERE final.percentage > %s;", 
                   tableName, 
                   conditions, 
                   tableName, 
