@@ -132,8 +132,8 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
     query <- sprintf("
     SELECT final.subreddit_a, final.subreddit_b 
     FROM 
-      (SELECT a.subreddit_a, 
-              b.subreddit_b, 
+      (SELECT a.sub_a, 
+              b.sub_b, 
               floor(100 * (count(*)/((a.authors + b.authors)/2))) AS percentage 
       FROM
         (SELECT t1.author AS author, 

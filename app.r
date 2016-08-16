@@ -46,16 +46,7 @@ server <- function(input, output, session) {
      user="readonly", 
      password="sfgFSH_sghsgj52662"
    )
-  'con <- dbConnect(
-    dbDriver("PostgreSQL"),
-    user="postgres",
-    password="xxxxxxxxx",
-    dbname="reddit_data",
-    host="localhost",
-    port=5432
-  )'
-  
-  
+
   # Getting start time of dataset
   minTimeQuery <- getMinValue(scheme$createTime)
   rs <- dbSendQuery(con, minTimeQuery)
