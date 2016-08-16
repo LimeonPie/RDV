@@ -37,14 +37,25 @@ server <- function(input, output, session) {
     host="46.101.153.165",
     port=3306
   )'
-  con <- dbConnect(
-    dbDriver("PostgreSQL"), 
-    host="reddit.cz9ypccni6rk.eu-west-1.redshift.amazonaws.com", 
-    port="5439",
-    dbname="reddit", 
-    user="readonly", 
-    password="sfgFSH_sghsgj52662"
-  )
+  
+   con <- dbConnect(
+     dbDriver("PostgreSQL"), 
+     host="reddit.cz9ypccni6rk.eu-west-1.redshift.amazonaws.com", 
+     port="5439",
+     dbname="reddit", 
+     user="readonly", 
+     password="sfgFSH_sghsgj52662"
+   )
+  'con <- dbConnect(
+    dbDriver("PostgreSQL"),
+    user="postgres",
+    password="xxxxxxxxx",
+    dbname="reddit_data",
+    host="localhost",
+    port=5432
+  )'
+  
+  
   # Getting start time of dataset
   minTimeQuery <- getMinValue(scheme$createTime)
   rs <- dbSendQuery(con, minTimeQuery)
@@ -376,6 +387,7 @@ server <- function(input, output, session) {
             }
             setProgress(message = "Fetching completed.")
           })
+        print(res)
         dbClearResult(res)
         
         # Output query info and results
@@ -388,7 +400,7 @@ server <- function(input, output, session) {
         
         #networkData <- graph.data.frame(data, directed = TRUE)
         #adjacencyMatrix <- table(data)
-        networkData <- data.frame(data$subreddit_a, data$subreddit_b)
+        networkData <- data.frame(data$sub_a, data$sub_b)
         print(networkData)
         
         #makePlot <- function(){
@@ -420,7 +432,7 @@ server <- function(input, output, session) {
         #plotting, if there is no data, text is written
           output$network <- renderSimpleNetwork({
             validate(
-              need(nrow(networkData)!= 0, "The query is empty so a plot is not drawn.")
+              need(nrow(networkData) != 0, "The query is empty so a plot is not drawn.")
             )
             if (nrow(networkData)!= 0){
               makePlot()

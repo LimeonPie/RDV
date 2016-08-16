@@ -1,6 +1,8 @@
 ## dbQuery.r ##
 ## Operations with data ##
 library(stringr)
+database <- "PostgreSQL"
+#database <- "MySQL"
 # small test 1k rows and full db
 tableName <- "rawdata"
 # bigger test 10k rows
@@ -126,7 +128,8 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   conditions <- paste(base, sep = "", collapse = "")
   print(conditions)
   
-  query <- sprintf("
+  if(database != "PostgreSQL"){
+    query <- sprintf("
     SELECT final.subreddit_a, final.subreddit_b 
     FROM 
       (SELECT a.subreddit_a, 
@@ -173,7 +176,79 @@ subredditsRelations <- function(gilded = NULL, upsMin = NULL,
   conditions, minSub, tableName, 
   conditions, tableName, conditions, 
   minSub, percentage)
- 
+  } else {
+    query <- sprintf("SELECT 
+                      final.sub_a, 
+                      final.sub_b 
+                    FROM
+                     (SELECT 
+                        a.subreddit AS sub_a, 
+                        a.authors, 
+                        b.subreddit AS sub_b, 
+                        b.authors, 
+                        FLOOR(100*COUNT(*)/((a.authors + b.authors)/2)) AS percent 
+                      FROM 
+                        (SELECT 
+                          t1.author, 
+                          t1.subreddit, 
+                          t2.authors 
+                        FROM 
+                          (SELECT 
+                            DISTINCT author, 
+                            subreddit 
+                          FROM %s 
+                          WHERE %s author!='[deleted]') AS t1 
+                        INNER JOIN 
+                          (SELECT * 
+                          FROM 
+                            (SELECT 
+                              subreddit, 
+                              count(distinct author) AS authors 
+                            FROM %s 
+                            WHERE %s author!='[deleted]' 
+                            GROUP BY subreddit) AS t5 
+                          WHERE authors >= %s) AS t2 
+                        ON t1.subreddit=t2.subreddit 
+                        GROUP BY t1.subreddit, t2.authors, t1.author) AS a 
+                      INNER JOIN 
+                        (SELECT 
+                          t3.author, 
+                          t3.subreddit, 
+                          t4.authors 
+                          FROM 
+                            (SELECT 
+                              DISTINCT author, 
+                              subreddit 
+                            FROM %s 
+                            WHERE %s author != '[deleted]') AS t3 
+                          INNER JOIN 
+                            (SELECT * 
+                            FROM 
+                              (SELECT 
+                                subreddit, 
+                                count(distinct author) AS authors 
+                              FROM %s 
+                              WHERE %s author!='[deleted]' 
+                              GROUP BY subreddit) AS t6 
+                            WHERE authors >= %s) AS t4 
+                          ON t3.subreddit=t4.subreddit 
+                          GROUP BY t3.subreddit, t3.author, t4.authors ) AS b 
+                      ON a.author=b.author 
+                      WHERE a.subreddit!=b.subreddit 
+                      GROUP BY a.subreddit, a.authors, b.subreddit, b.authors) AS final 
+                     WHERE final.percent > %s;", 
+                  tableName, 
+                  conditions, 
+                  tableName, 
+                  conditions, 
+                  minSub, 
+                  tableName, 
+                  conditions, 
+                  tableName, 
+                  conditions, 
+                  minSub, 
+                  percentage)
+  }
   #removes new lines from the query
   query <- gsub("[\r\n]", "", query)
   print(query)
