@@ -410,6 +410,12 @@ server <- function(input, output, session) {
           simpleNetwork(
             networkData, 
             fontSize = 20,
+            charge = 1,
+            linkDistance = 100,
+            opacity = 0.8,
+            linkColour = '#B5B5B5',
+            nodeColour = '#828282',
+            nodeClickColour = '#FF3D3D',
             zoom = TRUE
           )
         }
